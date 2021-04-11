@@ -1,9 +1,10 @@
-program = declaration, {declaration};
+program = declaration, {declaration}, {comment};
 
 declaration = 
    varDeclaration
    | functionDeclaration
 ;
+comment = "/*", {string} "*/";
 
 (* VARIABLE *)
 varDeclaration = type, varDeclarationInit;
@@ -41,10 +42,13 @@ simpleExpression = {simpleExpression, "or"}, andExpression;
 andExpression = {andExpression, "and"}, reliatonshipExpression;
 reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
 sumExpression = sumExpression, sumOperand, multiplyExpression;
-multiplyExpression = multiplyExpression, multiplyOperand, factor;
-factor = 
-   immutable
-   | mutable
+multiplyExpression = [multiplyExpression, multiplyOperand], factor;
+
+factor = ["(", type, ")"],
+   (
+      immutable
+      | mutable
+   )
 ;
 immutable = 
    "(", expression, ")" 
