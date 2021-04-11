@@ -1,7 +1,27 @@
-program = decl, {decl};
+program = declaration, {declaration};
 
-decl =;
+decl = 
+   varDeclaration
+   | functionDeclaration
+;
 
+(* VARIABLE *)
+varDeclaration = type, varDeclarationInit;
+varDeclarationInit = varDeclarationId, ['=', simpleExp];
+varDeclarationId = ID;
+
+(* FUNCTION sprawdzić czy potem mozna używać bez typów *)
+functionDeclaration = [type], ID, "(", parms, ")", statement;
+parms = {type, ID};
+
+
+type = 
+   "int"
+   | "float"
+   | "string"
+   | "bool"
+   | CURRENCY_NAME
+;
 
 int = 
    [-]
@@ -25,6 +45,7 @@ currency =
 
 string = "'", {CHAR} "'";
 
+ID = LETTER;
 DIGIT = "0-9";
 LETTER =
    "a-z"
@@ -38,4 +59,4 @@ CHAR =
    | SYMBOL
 ;
 
-CURRENCY_NAME = FROM FILE; // I.E. 'PLN' | 'EUR' | 'USD'; 
+CURRENCY_NAME = ; (*I.E. 'PLN' | 'EUR' | 'USD';*)
