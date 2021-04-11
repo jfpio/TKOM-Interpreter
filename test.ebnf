@@ -1,17 +1,16 @@
 program = declaration, {declaration};
 
-decl = 
+declaration = 
    varDeclaration
    | functionDeclaration
 ;
 
 (* VARIABLE *)
 varDeclaration = type, varDeclarationInit;
-varDeclarationInit = varDeclarationId, ['=', simpleExpression
-];
+varDeclarationInit = varDeclarationId, ['=', simpleExpression];
 varDeclarationId = ID;
 
-(* FUNCTION sprawdzić czy potem mozna używać bez typów *)
+(* FUNCTION *)
 functionDeclaration = [type], ID, "(", parms, ")", statement;
 parms = {type, ID};
 
@@ -32,6 +31,55 @@ compoundStatement = "{", {varDeclaration}, {statement} "}";
 expressionStatement = [expression], ";";
 exceptionStatement = "try", statement, ["catch", statement];
 
+(* Expressions*)
+expression =
+   (mutable, "=", expression)
+   | simpleExpression
+;
+
+simpleExpression = {simpleExpression, "or"}, andExpression;
+andExpression = {andExpression, "and"}, reliatonshipExpression;
+reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
+sumExpression = sumExpression, sumOperand, multiplyExpression;
+multiplyExpression = multiplyExpression, multiplyOperand, factor;
+factor = 
+   immutable
+   | mutable
+;
+immutable = 
+   "(", expression, ")" 
+   | call
+   | constant
+   ;
+
+mutable = ID;
+call = ID, "(", args, ")";
+args = {exp};
+constant = 
+   int
+   | float
+   | string
+   | bool
+   | currency
+;
+
+reliatonshipOperand = 
+   "<="
+   | "<"
+   | ">",
+   | ">=",
+   | "==",
+   | "!="
+;
+sumOperand = 
+   "+"
+   | "-"
+;
+multiplyOperand =
+   "*"
+   | "/"
+   | "%"
+;
 
 type = 
    "int"
@@ -63,7 +111,7 @@ currency =
 
 string = "'", {CHAR} "'";
 
-ID = LETTER;
+ID = LETTER, {DIGIT | LETTER};
 DIGIT = "0-9";
 LETTER =
    "a-z"
