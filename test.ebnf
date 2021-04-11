@@ -7,12 +7,30 @@ decl =
 
 (* VARIABLE *)
 varDeclaration = type, varDeclarationInit;
-varDeclarationInit = varDeclarationId, ['=', simpleExp];
+varDeclarationInit = varDeclarationId, ['=', simpleExpression
+];
 varDeclarationId = ID;
 
 (* FUNCTION sprawdzić czy potem mozna używać bez typów *)
 functionDeclaration = [type], ID, "(", parms, ")", statement;
 parms = {type, ID};
+
+(* STATEMENTS *)
+statement = 
+   expressionStatement
+   | compoundStatement
+   | ifStatement
+   | whileStatement
+   | returnStatement
+   | exceptionStatement
+;
+
+returnStatement = "return", [expressionStatement], ";";
+whileStatement = "while", "(", simpleExpression, ")", statement;
+ifStatement = "if", "(" simpleExpression, ")", statement;
+compoundStatement = "{", {varDeclaration}, {statement} "}";
+expressionStatement = [expression], ";";
+exceptionStatement = "try", statement, ["catch", statement];
 
 
 type = 
