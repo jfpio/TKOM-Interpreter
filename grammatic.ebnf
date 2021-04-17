@@ -1,65 +1,57 @@
-program                 = declaration, {declaration}, {comment};
+program = declaration, {declaration};
 
-declaration             = 
-   varDeclaration
+declaration = varDeclaration 
    | functionDeclaration
+   | currencyDeclaration
 ;
-comment                 = "/*", {string} "*/";
 
+(* CURRENCY *)
+currencyDeclaration = currency_ID, ":=", float | int, ";";
 (* VARIABLE *)
-varDeclaration          = type, varDeclarationInit;
-varDeclarationInit      = varDeclarationId, ['=', simpleExpression];
-varDeclarationId        = ID;
+varDeclaration = type, varDeclarationInit;
+varDeclarationInit = ID, ['=', expression];
 
 (* FUNCTION *)
-functionDeclaration     = [type], ID, "(", parms, ")", statement;
-parms                   = {type, ID};
+functionDeclaration = [type], ID, "(", parms, ")", "{", statement, "}";
+parms = {type, ID};
 
 (* STATEMENTS *)
-statement               = 
-   expressionStatement
-   | compoundStatement
+statement = compoundStatement
    | ifStatement
    | whileStatement
    | returnStatement
-   | exceptionStatement
 ;
 
-returnStatement         = "return", [expressionStatement], ";";
-whileStatement          = "while", "(", simpleExpression, ")", statement;
-ifStatement             = "if", "(" simpleExpression, ")", statement;
-compoundStatement       = "{", {varDeclaration}, {statement} "}";
-expressionStatement     = [expression], ";";
-exceptionStatement      = "try", statement, ["catch", statement];
+returnStatement = "return", [expression], ";";
+whileStatement = "while", "(", expression, ")", "{", statement "}";
+ifStatement = "if", "(" expression, ")", "{", statement "}";
+compoundStatement = {varDeclaration}, {assignment}, {statement};
 
 (* Expressions*)
-expression              =
-   (mutable, "=", expression)
-   | simpleExpression
-;
+(* rekursja lewostronna - naprawić *)
+expression = andExpression, {"or", expression};
+andExpression = reliatonshipExpression, {"and", andExpression};
+reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
+sumExpression = multiplyExpression, sumOperand, sumExpression;
+multiplyExpression = factor, [multiplyOperand, multiplyExpression];
 
-simpleExpression        = {simpleExpression, "or"}, andExpression;
-andExpression           = {andExpression, "and"}, reliatonshipExpression;
-reliatonshipExpression  = sumExpression, [reliatonshipOperand, sumExpression];
-sumExpression           = sumExpression, sumOperand, multiplyExpression;
-multiplyExpression      = [multiplyExpression, multiplyOperand], factor;
-
-factor                  = ["(", type, ")"],
-   (
+assignment = (mutable, "=", expression);
+factor = ["(", type, ")"],(
       immutable
       | mutable
    )
 ;
-immutable               = 
+
+immutable = 
    "(", expression, ")" 
    | call
    | constant
    ;
 
-mutable                 = ID;
-call                    = ID, "(", args, ")";
-args                    = {exp};
-constant                = 
+mutable = ID;
+call = ID, "(", args, ")";
+args = {expression};
+constant = 
    int
    | float
    | string
@@ -67,7 +59,7 @@ constant                =
    | currency
 ;
 
-reliatonshipOperand     = 
+reliatonshipOperand = 
    "<="
    | "<"
    | ">",
@@ -75,58 +67,47 @@ reliatonshipOperand     =
    | "==",
    | "!="
 ;
-sumOperand              = 
+
+sumOperand = 
    "+"
    | "-"
 ;
-multiplyOperand         =
+
+multiplyOperand =
    "*"
    | "/"
    | "%"
 ;
 
-type                    = 
+type = 
    "int"
    | "float"
    | "string"
    | "bool"
-   | CURRENCY_NAME
+   | currency_ID
 ;
 
-int                     = 
-   [-]
-   ,
-   "0" 
-   | "1-9",{DIGIT}
-;
+int = [-], "0" | "1-9",{DIGIT};
+float = int, '.' , DIGIT, {DIGIT};
+currency = (int | float), currency_ID;
 
-float                   =
-   int, '.' , DIGIT, {DIGIT}
-;
+string = "'", {CHAR} "'";
 
-currency                = 
-   (
-      int 
-      | float
-   )
-   ,
-   CURRENCY_NAME
-;
+ID = LETTER, {DIGIT | LETTER};
+currency_ID = CAPITAL_LETTER, CAPITAL_LETTER, CAPITAL_LETTER; 
 
-string                  = "'", {CHAR} "'";
-
-ID                      = LETTER, {DIGIT | LETTER};
-DIGIT                   = "0-9";
-LETTER                  =
-   "a-z"
-   | "A-Z"
-;
-SYMBOL                  = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "'" | '"' | "=" | "|" | "." | "," | ";" "_";
-
-CHAR                    = 
+CHAR = 
    DIGIT
    | LETTER
    | SYMBOL
 ;
 
-CURRENCY_NAME           = ; (*I.E. 'PLN' | 'EUR' | 'USD';*)
+LETTER =
+   SMALL_LETTER
+   | CAPITAL_LETTER
+;
+
+SMALL_LETTER = "a-z";
+CAPITAL_LETTER = "A-Z";
+SYMBOL = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "'" | '"' | "=" | "|" | "." | "," | ";" "_";
+DIGIT = "0-9";
