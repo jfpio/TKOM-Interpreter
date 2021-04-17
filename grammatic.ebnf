@@ -42,10 +42,12 @@ factor = ["(", type, ")"],(
    )
 ;
 
-immutable = 
-   "(", expression, ")" 
-   | call
-   | constant
+immutable =
+   ["!"], (
+      "(", expression, ")" 
+      | call
+      | constant
+   )
    ;
 
 mutable = ID;
