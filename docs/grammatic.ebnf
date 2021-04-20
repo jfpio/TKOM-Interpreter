@@ -28,7 +28,6 @@ ifStatement = "if", "(" expression, ")", "{", statement "}";
 compoundStatement = {varDeclaration}, {assignment}, {statement};
 
 (* Expressions*)
-(* rekursja lewostronna - naprawić *)
 expression = andExpression, {"or", expression};
 andExpression = reliatonshipExpression, {"and", andExpression};
 reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
