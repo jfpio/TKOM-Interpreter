@@ -29,8 +29,8 @@ compoundStatement = {varDeclaration}, {assignment}, {statement};
 
 (* Expressions*)
 expression = andExpression, {"or", expression};
-andExpression = reliatonshipExpression, {"and", andExpression};
-reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
+andExpression = relationshipExpression, {"and", andExpression};
+relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
 sumExpression = multiplyExpression, sumOperand, sumExpression;
 multiplyExpression = factor, [multiplyOperand, multiplyExpression];
 
@@ -60,7 +60,7 @@ constant =
    | currency
 ;
 
-reliatonshipOperand = 
+relationshipExpression =
    "<="
    | "<"
    | ">",
