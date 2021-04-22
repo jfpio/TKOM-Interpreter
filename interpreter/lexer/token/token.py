@@ -1,5 +1,5 @@
-from interpreter.lexer.models.token.source_position import SourcePosition
-from interpreter.lexer.models.token.token_type import TokenType
+from interpreter.source.source_position import SourcePosition
+from interpreter.lexer.token.token_type import TokenType
 
 
 class Token:
