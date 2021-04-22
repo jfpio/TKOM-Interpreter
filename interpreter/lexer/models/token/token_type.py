@@ -29,6 +29,7 @@ class TokenType(Enum):
     STRING = auto()
     BOOL = auto()
     CURRENCY = auto()
+    VOID = auto()
 
     # VALUES
     INT_VALUE = auto()

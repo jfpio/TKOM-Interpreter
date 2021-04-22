@@ -85,6 +85,7 @@ type =
    | "float"
    | "string"
    | "bool"
+   | "void"
    | currency_ID
 ;
 
