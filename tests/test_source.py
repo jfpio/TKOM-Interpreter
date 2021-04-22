@@ -22,7 +22,7 @@ class TestSource:
             SourcePosition(4, 0)
         ]
 
-    def test_get_chars_from_string(self):
+    def test_get_chars_from_file(self):
         with open('tests/data/test_source.curr', 'r') as file:
             source = Source(file)
 
