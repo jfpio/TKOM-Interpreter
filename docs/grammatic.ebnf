@@ -94,7 +94,7 @@ currency = (int | float), currency_ID;
 
 string = "'", {CHAR} "'";
 
-ID = LETTER, {DIGIT | LETTER};
+ID = SMALL_LETTER, {"_" | SMALL_LETTER};
 currency_ID = CAPITAL_LETTER, CAPITAL_LETTER, CAPITAL_LETTER; 
 
 CHAR = 
