@@ -7,6 +7,6 @@ class LexerError(Exception):
         self.position = source_position
 
     def __str__(self):
-        return f"Lexer error with message: {self.message}" \
+        return f"{self.message}\n" \
                f"in line: {self.position.line}\n" \
                f"column: {self.position.column}"

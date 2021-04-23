@@ -15,7 +15,6 @@ class TokenType(Enum):
     DIV_OPERATOR = auto()
     MODULO_OPERATOR = auto()
     NEGATION_OPERATOR = auto()
-
     EQUAL_OPERATOR = auto()
     NOT_EQUAL_OPERATOR = auto()
     LESS_THAN_OPERATOR = auto()
@@ -51,3 +50,4 @@ class TokenType(Enum):
     RETURN_NAME = auto()
     WHILE_NAME = auto()
     EOF = auto()
+

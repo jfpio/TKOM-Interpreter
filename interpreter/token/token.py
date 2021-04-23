@@ -3,7 +3,7 @@ from interpreter.token.token_type import TokenType
 
 
 class Token:
-    def __init__(self, type: TokenType, value, source_position: SourcePosition):
+    def __init__(self, type: TokenType, value: any, source_position: SourcePosition):
         self.type = type
         self.value = value
         self.source_position = source_position
