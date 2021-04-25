@@ -18,6 +18,13 @@ class Lexer:
     def get_next_token(self) -> Token:
         self._skip_whitespace()
 
+        token = self._skip_comment_or_build_div_operator()
+        if token:
+            return token
+
+        if self._get_char() == 'EOF':
+            return Token(TokenType.EOF, '', self._get_position())
+
         token = self._build_one_of_number_value()
         if token:
             return token
@@ -38,8 +45,9 @@ class Lexer:
         if token:
             return token
 
-        if self._get_char() == 'EOF':
-            return Token(TokenType.EOF, '', self._get_position())
+        token = self._build_currency_type_name()
+        if token:
+            return token
 
         raise LexerError("Can't match any token", self._previous_position)
 
@@ -53,58 +61,7 @@ class Lexer:
     def _get_position(self) -> SourcePosition:
         return self._source.get_position()
 
-    def _build_alpha_keywords_or_identifier(self) -> Optional[Token]:
-        keywords_dict = {
-            'if': TokenType.IF_NAME,
-            'else': TokenType.ELSE_NAME,
-            'return': TokenType.RETURN_NAME,
-            'while': TokenType.WHILE_NAME,
-            'int': TokenType.INT,
-            'float': TokenType.FLOAT_VALUE,
-            'string': TokenType.STRING_VALUE,
-            'bool': TokenType.BOOL_VALUE,
-            'currency': TokenType.CURRENCY,
-            'true': TokenType.TRUE,
-            'false': TokenType.FALSE
-        }
-
-        buffer = ''
-        char = self._get_char()
-
-        while char.isalpha() and char != 'EOF':
-            buffer += char
-            self._next_char()
-            char = self._get_char()
-
-        if buffer == '':
-            return None
-        elif buffer in keywords_dict:
-            return Token(keywords_dict[buffer], '', self._previous_position)
-        else:
-            return Token(TokenType.ID, buffer, self._previous_position)
-
-    def _build_one_char_tokens(self) -> Optional[Token]:
-        non_conflict_one_line_operators = {
-            "+": TokenType.ADD_OPERATOR,
-            "-": TokenType.SUB_OPERATOR,
-            "*": TokenType.MUL_OPERATOR,
-            "%": TokenType.MODULO_OPERATOR,
-            "(": TokenType.LEFT_BRACKET,
-            ")": TokenType.RIGHT_BRACKET,
-            "{": TokenType.LEFT_CURLY_BRACKET,
-            "}": TokenType.RIGHT_CURLY_BRACKET,
-            ";": TokenType.SEMICOLON
-        }
-        char = self._get_char()
-
-        if char in non_conflict_one_line_operators:
-            token = Token(non_conflict_one_line_operators[char], '', self._get_position())
-            self._next_char()
-            return token
-        else:
-            return None
-
-    def _build_operators(self) -> Optional[Token]:
+    def _skip_comment_or_build_div_operator(self) -> Optional[Token]:
         char = self._get_char()
 
         if char == "/":
@@ -117,6 +74,84 @@ class Lexer:
                 token = Token(TokenType.DIV_OPERATOR, '', self._get_position())
                 self._next_char()
                 return token
+        else:
+            return None
+
+    def _build_alpha_keywords_or_identifier(self) -> Optional[Token]:
+        keywords_dict = {
+            'if': TokenType.IF_NAME,
+            'else': TokenType.ELSE_NAME,
+            'return': TokenType.RETURN_NAME,
+            'while': TokenType.WHILE_NAME,
+            'int': TokenType.INT,
+            'float': TokenType.FLOAT,
+            'string': TokenType.STRING,
+            'bool': TokenType.BOOL,
+            'currency': TokenType.CURRENCY,
+            'true': TokenType.TRUE,
+            'false': TokenType.FALSE
+        }
+
+        buffer = ''
+        char = self._get_char()
+
+        i = 0
+        while char.isalpha() and char.islower() or char == '_':
+            if i == MAX_STRING:
+                raise LexerError("Too many chars in ID", self._get_position())
+            i += 1
+            buffer += char
+            self._next_char()
+            char = self._get_char()
+
+        if buffer == '':
+            return None
+        elif buffer in keywords_dict:
+            return Token(keywords_dict[buffer], '', self._previous_position)
+        else:
+            return Token(TokenType.ID, buffer, self._previous_position)
+
+    def _build_currency_type_name(self) -> Optional[Token]:
+        buffer = ''
+        char = self._get_char()
+
+        if not char.isupper():
+            return None
+
+        for i in range(3):
+            buffer += char
+            self._next_char()
+            char = self._get_char()
+
+        if not buffer.isupper() or not len(buffer.strip()) == 3:
+            return None
+        else:
+            return Token(TokenType.CURRENCY, buffer, self._previous_position)
+
+    def _build_one_char_tokens(self) -> Optional[Token]:
+        non_conflict_one_line_operators = {
+            "+": TokenType.ADD_OPERATOR,
+            "-": TokenType.SUB_OPERATOR,
+            "*": TokenType.MUL_OPERATOR,
+            "%": TokenType.MODULO_OPERATOR,
+            "(": TokenType.LEFT_BRACKET,
+            ")": TokenType.RIGHT_BRACKET,
+            "{": TokenType.LEFT_CURLY_BRACKET,
+            "}": TokenType.RIGHT_CURLY_BRACKET,
+            ";": TokenType.SEMICOLON,
+            ",": TokenType.COMMA
+        }
+        char = self._get_char()
+
+        if char in non_conflict_one_line_operators:
+            token = Token(non_conflict_one_line_operators[char], '', self._get_position())
+            self._next_char()
+            return token
+        else:
+            return None
+
+    def _build_operators(self) -> Optional[Token]:
+        char = self._get_char()
 
         if char == ":":
             self._next_char()

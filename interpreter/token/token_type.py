@@ -41,6 +41,7 @@ class TokenType(Enum):
     # RESERVED NAMES AND CHARS
     LEFT_BRACKET = auto()
     RIGHT_BRACKET = auto()
+    COMMA = auto()
     LEFT_CURLY_BRACKET = auto()
     RIGHT_CURLY_BRACKET = auto()
     SEMICOLON = auto()
