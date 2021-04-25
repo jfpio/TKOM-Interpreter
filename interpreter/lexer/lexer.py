@@ -13,6 +13,7 @@ MAX_NUMBER_OF_DIGITS = 100
 class Lexer:
     def __init__(self, source: Source):
         self._source = source
+        self._previous_position = SourcePosition(0, 0)
 
     def get_next_token(self) -> Token:
         self._skip_whitespace()
@@ -69,21 +70,18 @@ class Lexer:
 
         buffer = ''
         char = self._get_char()
-        position = self._get_position()
 
         while char.isalpha() and char != 'EOF':
             buffer += char
-            position = self._get_position()
-
             self._next_char()
             char = self._get_char()
 
         if buffer == '':
             return None
         elif buffer in keywords_dict:
-            return Token(keywords_dict[buffer], '', position)
+            return Token(keywords_dict[buffer], '', self._previous_position)
         else:
-            return Token(TokenType.ID, buffer, position)
+            return Token(TokenType.ID, buffer, self._previous_position)
 
     def _build_one_char_tokens(self) -> Optional[Token]:
         non_conflict_one_line_operators = {
@@ -179,9 +177,9 @@ class Lexer:
             self._next_char()
             char = self._get_char()
 
-        position = self._get_position()
+        token = Token(TokenType.STRING_VALUE, string, self._get_position())
         self._next_char()
-        return Token(TokenType.STRING_VALUE, string, position)
+        return token
 
     def _build_one_of_number_value(self) -> Optional[Token]:
         char = self._get_char()
@@ -234,17 +232,15 @@ class Lexer:
         number = previous_base
         currency_name = ''
 
-        position = self._get_position()
         for i in range(3):
             if self._get_char().isupper() and self._get_char() != 'EOF':
                 currency_name += self._get_char()
-                position = self._get_position()
                 self._next_char()
 
             else:
                 return None
 
-        return Token(TokenType.CURRENCY_VALUE, f"{number}{currency_name}", position)
+        return Token(TokenType.CURRENCY_VALUE, f"{number}{currency_name}", self._previous_position)
 
     def _skip_whitespace(self):
         char = self._get_char()
@@ -283,7 +279,7 @@ class Lexer:
             self._next_char()
             return token
         else:
-            return Token(one_char_token_type, '', self._get_position())
+            return Token(one_char_token_type, '', self._previous_position)
 
 
 def tokens_generator(lexer):

@@ -56,18 +56,22 @@ class TestSingleTokens:
     def test_equal_operator(self):
         token = self._get_first_token(' == ')
         assert token.type == TokenType.EQUAL_OPERATOR
+        assert token.source_position == SourcePosition(1, 3)
 
     def test_assign_operator(self):
         token = self._get_first_token(' = ')
         assert token.type == TokenType.ASSIGN_OPERATOR
+        assert token.source_position == SourcePosition(1, 2)
 
     def test_divide_operator(self):
         token = self._get_first_token(' /a ')
         assert token.type == TokenType.DIV_OPERATOR
+        assert token.source_position == SourcePosition(1, 3)
 
     def test_currency_declaration(self):
         token = self._get_first_token(' := ')
         assert token.type == TokenType.CURRENCY_DECLARATION_OPERATOR
+        assert token.source_position == SourcePosition(1, 3)
 
     def test_currency_declaration_error(self):
         with pytest.raises(LexerError):
@@ -78,8 +82,9 @@ class TestSingleTokens:
         assert token.type == TokenType.IF_NAME
 
     def test_while_keyword(self):
-        token = self._get_first_token(' if a b ')
-        assert token.type == TokenType.IF_NAME
+        token = self._get_first_token(' while a b ')
+        assert token.type == TokenType.WHILE_NAME
+        assert token.source_position == SourcePosition(1, 6)
 
     def test_id(self):
         token = self._get_first_token(' alfa ')
