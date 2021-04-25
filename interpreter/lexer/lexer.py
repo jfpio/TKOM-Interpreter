@@ -11,16 +11,6 @@ class Lexer:
     def __init__(self, source: Source):
         self._source = source
 
-    def _get_char(self) -> str:
-        return self._source.get_char()
-
-    def _next_char(self):
-        self._previous_position = self._get_position()
-        self._source.next_char()
-
-    def _get_position(self) -> SourcePosition:
-        return self._source.get_position()
-
     def get_next_token(self) -> Token:
         self._skip_whitespace()
 
@@ -33,6 +23,16 @@ class Lexer:
             return token
         else:
             raise LexerError("Can't match any token", self._previous_position)
+
+    def _get_char(self) -> str:
+        return self._source.get_char()
+
+    def _next_char(self):
+        self._previous_position = self._get_position()
+        self._source.next_char()
+
+    def _get_position(self) -> SourcePosition:
+        return self._source.get_position()
 
     def _build_one_of_number_value(self) -> typing.Union[None, Token]:
         char = self._get_char()
@@ -61,16 +61,16 @@ class Lexer:
         char = self._get_char()
         last_position = self._get_position()
 
-        i = 0.1
+        i = -1
         while char.isdigit():
-            base = base + float(char) * i
+            base = base + float(char) * 10**i
 
             last_position = self._get_position()
             self._source.next_char()
             char = self._source.get_char()
-            i *= 0.1
+            i += -1
 
-        if char.isupper():
+        if char.isupper() and char != 'EOF':
             return self._build_currency(base)
 
         return Token(TokenType.FLOAT_VALUE, base, last_position)
@@ -79,14 +79,16 @@ class Lexer:
         number = previous_base
         currency_name = ''
 
+        position = self._get_position()
         for i in range(3):
-            if self._get_char().isupper() and not 'EOF':
-                currency_name.join(self._get_char())
+            if self._get_char().isupper() and self._get_char() != 'EOF':
+                currency_name += self._get_char()
+                position = self._get_position()
                 self._next_char()
+
             else:
                 return None
-            position = self._get_position()
-            self._next_char()
+
         return Token(TokenType.CURRENCY_VALUE, f"{number}{currency_name}", position)
 
     def _skip_whitespace(self):
@@ -94,3 +96,12 @@ class Lexer:
         while char.isspace():
             self._next_char()
             char = self._get_char()
+
+
+def tokens_generator(lexer):
+    previous_token = Token(TokenType.INT_VALUE, 1, SourcePosition(0, 0))
+
+    while previous_token.type != TokenType.EOF:
+        new_token = lexer.get_next_token()
+        previous_token = new_token
+        yield new_token
