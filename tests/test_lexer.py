@@ -1,6 +1,9 @@
 import io
 
+import pytest
+
 from interpreter.lexer.lexer import Lexer, tokens_generator
+from interpreter.lexer.lexer_error import LexerError
 from interpreter.source.source import Source
 from interpreter.source.source_position import SourcePosition
 from interpreter.token.token import Token
@@ -18,6 +21,11 @@ class TestSingleTokens:
         assert token.value == 111
         assert token.source_position == SourcePosition(1, 3)
 
+    def test_get_extreme_big_int(self):
+        big_int_string = ''.join('1' for _ in range(10000))
+        with pytest.raises(LexerError):
+            self._get_first_token(big_int_string)
+
     def test_get_float(self):
         token = self._get_first_token('111.1')
         assert token.type == TokenType.FLOAT_VALUE
@@ -29,6 +37,12 @@ class TestSingleTokens:
         assert token.type == TokenType.CURRENCY_VALUE
         assert token.value == '111.1USD'
         assert token.source_position == SourcePosition(1, 8)
+
+    def test_string(self):
+        token = self._get_first_token('"abc"')
+        assert token.type == TokenType.STRING_VALUE
+        assert token.value == 'abc'
+        assert token.source_position == SourcePosition(1, 5)
 
     @staticmethod
     def _get_first_token(string: str) -> Token:

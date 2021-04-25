@@ -6,6 +6,8 @@ from interpreter.source.source_position import SourcePosition
 from interpreter.token.token import Token
 from interpreter.token.token_type import TokenType
 
+MAX_STRING = 1000
+MAX_NUMBER_OF_DIGITS = 100
 
 class Lexer:
     def __init__(self, source: Source):
@@ -18,11 +20,16 @@ class Lexer:
             return Token(TokenType.EOF, '', self._get_position())
 
         token = self._build_one_of_number_value()
-
         if token:
             return token
-        else:
-            raise LexerError("Can't match any token", self._previous_position)
+
+        token = self._build_string()
+        if token:
+            return token
+
+
+
+        raise LexerError("Can't match any token", self._previous_position)
 
     def _get_char(self) -> str:
         return self._source.get_char()
@@ -34,6 +41,30 @@ class Lexer:
     def _get_position(self) -> SourcePosition:
         return self._source.get_position()
 
+    def _build_string(self) -> typing.Union[None, Token]:
+        string = ''
+
+        char = self._get_char()
+        if not char == '"':
+            return None
+
+        i = 0
+        self._next_char()
+        char = self._get_char()
+
+        while char != '"':
+            if i == MAX_STRING:
+                raise LexerError(f"Too many char in string (above {MAX_STRING})", self._get_position())
+            i += 1
+
+            string += char
+            self._next_char()
+            char = self._get_char()
+
+        position = self._get_position()
+        self._next_char()
+        return Token(TokenType.STRING_VALUE, string, position)
+
     def _build_one_of_number_value(self) -> typing.Union[None, Token]:
         char = self._get_char()
         last_position = self._get_position()
@@ -42,9 +73,13 @@ class Lexer:
             return None
 
         base = 0
+        i = 0
         while char.isdigit():
-            base = base * 10 + int(char)
+            if i == MAX_NUMBER_OF_DIGITS:
+                raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
+            i += 1
 
+            base = base * 10 + int(char)
             last_position = self._get_position()
             self._source.next_char()
             char = self._source.get_char()
@@ -63,8 +98,10 @@ class Lexer:
 
         i = -1
         while char.isdigit():
-            base = base + float(char) * 10**i
+            if i*(-1) == MAX_NUMBER_OF_DIGITS:
+                raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
 
+            base = base + float(char) * 10**i
             last_position = self._get_position()
             self._source.next_char()
             char = self._source.get_char()
