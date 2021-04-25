@@ -44,6 +44,50 @@ class TestSingleTokens:
         assert token.value == 'abc'
         assert token.source_position == SourcePosition(1, 5)
 
+    def test_get_extreme_big_string(self):
+        big_string = ''.join('i' for _ in range(10000))
+        with pytest.raises(LexerError):
+            self._get_first_token('"' + big_string)
+
+    def test_comment(self):
+        token = self._get_first_token('/* aaa*/')
+        assert token.type == TokenType.EOF
+
+    def test_equal_operator(self):
+        token = self._get_first_token(' == ')
+        assert token.type == TokenType.EQUAL_OPERATOR
+
+    def test_assign_operator(self):
+        token = self._get_first_token(' = ')
+        assert token.type == TokenType.ASSIGN_OPERATOR
+
+    def test_divide_operator(self):
+        token = self._get_first_token(' /a ')
+        assert token.type == TokenType.DIV_OPERATOR
+
+    def test_currency_declaration(self):
+        token = self._get_first_token(' := ')
+        assert token.type == TokenType.CURRENCY_DECLARATION_OPERATOR
+
+    def test_currency_declaration_error(self):
+        with pytest.raises(LexerError):
+            self._get_first_token(' : ')
+
+    def test_if_keyword(self):
+        token = self._get_first_token(' if a b ')
+        assert token.type == TokenType.IF_NAME
+
+    def test_while_keyword(self):
+        token = self._get_first_token(' if a b ')
+        assert token.type == TokenType.IF_NAME
+
+    def test_id(self):
+        token = self._get_first_token(' alfa ')
+        assert token.type == TokenType.ID
+        assert token.value == 'alfa'
+        assert token.source_position == SourcePosition(1, 5)
+
+
     @staticmethod
     def _get_first_token(string: str) -> Token:
         source = Source(io.StringIO(string))

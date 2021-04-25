@@ -1,4 +1,4 @@
-import typing
+from typing import Tuple, Optional
 
 from interpreter.lexer.lexer_error import LexerError
 from interpreter.source.source import Source
@@ -9,15 +9,13 @@ from interpreter.token.token_type import TokenType
 MAX_STRING = 1000
 MAX_NUMBER_OF_DIGITS = 100
 
+
 class Lexer:
     def __init__(self, source: Source):
         self._source = source
 
     def get_next_token(self) -> Token:
         self._skip_whitespace()
-
-        if self._get_char() == 'EOF':
-            return Token(TokenType.EOF, '', self._get_position())
 
         token = self._build_one_of_number_value()
         if token:
@@ -27,7 +25,20 @@ class Lexer:
         if token:
             return token
 
+        token = self._build_operators()
+        if token:
+            return token
 
+        token = self._build_one_char_tokens()
+        if token:
+            return token
+
+        token = self._build_alpha_keywords_or_identifier()
+        if token:
+            return token
+
+        if self._get_char() == 'EOF':
+            return Token(TokenType.EOF, '', self._get_position())
 
         raise LexerError("Can't match any token", self._previous_position)
 
@@ -41,7 +52,114 @@ class Lexer:
     def _get_position(self) -> SourcePosition:
         return self._source.get_position()
 
-    def _build_string(self) -> typing.Union[None, Token]:
+    def _build_alpha_keywords_or_identifier(self) -> Optional[Token]:
+        keywords_dict = {
+            'if': TokenType.IF_NAME,
+            'else': TokenType.ELSE_NAME,
+            'return': TokenType.RETURN_NAME,
+            'while': TokenType.WHILE_NAME,
+            'int': TokenType.INT,
+            'float': TokenType.FLOAT_VALUE,
+            'string': TokenType.STRING_VALUE,
+            'bool': TokenType.BOOL_VALUE,
+            'currency': TokenType.CURRENCY,
+            'true': TokenType.TRUE,
+            'false': TokenType.FALSE
+        }
+
+        buffer = ''
+        char = self._get_char()
+        position = self._get_position()
+
+        while char.isalpha() and char != 'EOF':
+            buffer += char
+            position = self._get_position()
+
+            self._next_char()
+            char = self._get_char()
+
+        if buffer == '':
+            return None
+        elif buffer in keywords_dict:
+            return Token(keywords_dict[buffer], '', position)
+        else:
+            return Token(TokenType.ID, buffer, position)
+
+    def _build_one_char_tokens(self) -> Optional[Token]:
+        non_conflict_one_line_operators = {
+            "+": TokenType.ADD_OPERATOR,
+            "-": TokenType.SUB_OPERATOR,
+            "*": TokenType.MUL_OPERATOR,
+            "%": TokenType.MODULO_OPERATOR,
+            "(": TokenType.LEFT_BRACKET,
+            ")": TokenType.RIGHT_BRACKET,
+            "{": TokenType.LEFT_CURLY_BRACKET,
+            "}": TokenType.RIGHT_CURLY_BRACKET,
+            ";": TokenType.SEMICOLON
+        }
+        char = self._get_char()
+
+        if char in non_conflict_one_line_operators:
+            token = Token(non_conflict_one_line_operators[char], '', self._get_position())
+            self._next_char()
+            return token
+        else:
+            return None
+
+    def _build_operators(self) -> Optional[Token]:
+        char = self._get_char()
+
+        if char == "/":
+            self._next_char()
+            char = self._get_char()
+            if char == "*":
+                self._skip_comment()
+                self._next_char()
+            else:
+                token = Token(TokenType.DIV_OPERATOR, '', self._get_position())
+                self._next_char()
+                return token
+
+        if char == ":":
+            self._next_char()
+            if self._get_char() == "=":
+                token = Token(TokenType.CURRENCY_DECLARATION_OPERATOR, '', self._get_position())
+                self._next_char()
+                return token
+            else:
+                raise LexerError('Unknown operator ":"', self._get_position())
+
+        token = self.build_one_char_token_or_two_char_token(
+            ("!", TokenType.NEGATION_OPERATOR),
+            ("!=", TokenType.NOT_EQUAL_OPERATOR)
+        )
+        if token:
+            return token
+
+        token = self.build_one_char_token_or_two_char_token(
+            ("=", TokenType.ASSIGN_OPERATOR),
+            ("==", TokenType.EQUAL_OPERATOR)
+        )
+        if token:
+            return token
+
+        token = self.build_one_char_token_or_two_char_token(
+            ("<", TokenType.LESS_THAN_OPERATOR),
+            ("<=", TokenType.LESS_THAN_OR_EQUAL_OPERATOR)
+        )
+        if token:
+            return token
+
+        token = self.build_one_char_token_or_two_char_token(
+            (">", TokenType.GREATER_THAN_OPERATOR),
+            (">=", TokenType.GREATER_THAN_OPERATOR_OR_EQUAL)
+        )
+        if token:
+            return token
+
+        return None
+
+    def _build_string(self) -> Optional[Token]:
         string = ''
 
         char = self._get_char()
@@ -65,7 +183,7 @@ class Lexer:
         self._next_char()
         return Token(TokenType.STRING_VALUE, string, position)
 
-    def _build_one_of_number_value(self) -> typing.Union[None, Token]:
+    def _build_one_of_number_value(self) -> Optional[Token]:
         char = self._get_char()
         last_position = self._get_position()
 
@@ -89,7 +207,7 @@ class Lexer:
 
         return Token(TokenType.INT_VALUE, base, last_position)
 
-    def _build_float_or_currency(self, previous_base: int) -> typing.Union[None, Token]:
+    def _build_float_or_currency(self, previous_base: int) -> Optional[Token]:
         base = float(previous_base)
 
         self._next_char()
@@ -112,7 +230,7 @@ class Lexer:
 
         return Token(TokenType.FLOAT_VALUE, base, last_position)
 
-    def _build_currency(self, previous_base: float) -> typing.Union[None, Token]:
+    def _build_currency(self, previous_base: float) -> Optional[Token]:
         number = previous_base
         currency_name = ''
 
@@ -133,6 +251,39 @@ class Lexer:
         while char.isspace():
             self._next_char()
             char = self._get_char()
+
+    def _skip_comment(self):
+        i = 0
+        while True:
+            if i == MAX_STRING:
+                raise LexerError(f"Too many char in comment (above {MAX_STRING})", self._get_position())
+            i += 1
+
+            if self._get_char() == "*":
+                self._next_char()
+                if self._get_char() == "/":
+                    break
+
+            self._next_char()
+
+    def build_one_char_token_or_two_char_token(
+            self,
+            one_char_token: Tuple[str, TokenType],
+            two_chars_token: Tuple[str, TokenType]
+    ) -> Optional[Token]:
+        one_char_token_value, one_char_token_type = one_char_token
+        two_chars_token_value, two_chars_token_type = two_chars_token
+
+        if self._get_char() != one_char_token_value:
+            return None
+
+        self._next_char()
+        if self._get_char() == two_chars_token_value[1]:
+            token = Token(two_chars_token_type, '', self._get_position())
+            self._next_char()
+            return token
+        else:
+            return Token(one_char_token_type, '', self._get_position())
 
 
 def tokens_generator(lexer):

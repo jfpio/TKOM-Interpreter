@@ -20,7 +20,7 @@ class TokenType(Enum):
     LESS_THAN_OPERATOR = auto()
     GREATER_THAN_OPERATOR = auto()
     LESS_THAN_OR_EQUAL_OPERATOR = auto()
-    GREATER_THAN_OPERATOR_OR_EQUAL_TO = auto()
+    GREATER_THAN_OPERATOR_OR_EQUAL = auto()
 
     # TYPES
     INT = auto()
@@ -28,7 +28,6 @@ class TokenType(Enum):
     STRING = auto()
     BOOL = auto()
     CURRENCY = auto()
-    VOID = auto()
 
     # VALUES
     INT_VALUE = auto()
@@ -36,18 +35,17 @@ class TokenType(Enum):
     STRING_VALUE = auto()
     BOOL_VALUE = auto()
     CURRENCY_VALUE = auto()
+    TRUE = auto()
+    FALSE = auto()
 
     # RESERVED NAMES AND CHARS
     LEFT_BRACKET = auto()
     RIGHT_BRACKET = auto()
     LEFT_CURLY_BRACKET = auto()
     RIGHT_CURLY_BRACKET = auto()
-    QUOTATION = auto()
     SEMICOLON = auto()
-    COMMA = auto()
     IF_NAME = auto()
     ELSE_NAME = auto()
     RETURN_NAME = auto()
     WHILE_NAME = auto()
     EOF = auto()
-
