@@ -35,8 +35,6 @@ class TokenType(Enum):
     STRING_VALUE = auto()
     BOOL_VALUE = auto()
     CURRENCY_VALUE = auto()
-    TRUE = auto()
-    FALSE = auto()
 
     # RESERVED NAMES AND CHARS
     LEFT_BRACKET = auto()

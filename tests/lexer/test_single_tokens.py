@@ -46,12 +46,14 @@ class TestSingleTokens:
 
     def test_true_value(self):
         token = self._get_first_token('true')
-        assert token.type == TokenType.TRUE
+        assert token.type == TokenType.BOOL_VALUE
+        assert token.value == 'true'
         assert token.source_position == SourcePosition(1, 4)
 
     def test_false_value(self):
         token = self._get_first_token('false')
-        assert token.type == TokenType.FALSE
+        assert token.type == TokenType.BOOL_VALUE
+        assert token.value == 'false'
         assert token.source_position == SourcePosition(1, 5)
 
     def test_get_extreme_big_string(self):
