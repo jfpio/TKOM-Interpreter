@@ -227,12 +227,7 @@ class Lexer:
             char = self._get_char()
 
     def _skip_comment(self):
-        i = 0
         while True:
-            if i == MAX_STRING:
-                raise LexerError(f"Too many char in comment (above {MAX_STRING})", self._get_position())
-            i += 1
-
             if self._get_char() == "*":
                 self._next_char()
                 if self._get_char() == "/":
@@ -283,9 +278,6 @@ class Lexer:
 
 
 def tokens_generator(lexer):
-    previous_token = Token(TokenType.INT_VALUE, 1, SourcePosition(0, 0))
-
-    while previous_token.type != TokenType.EOF:
-        new_token = lexer.get_next_token()
-        previous_token = new_token
+    while (new_token := lexer.get_next_token()).type != TokenType.EOF:
         yield new_token
+    yield new_token
