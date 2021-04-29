@@ -17,35 +17,16 @@ class Lexer:
 
     def get_next_token(self) -> Token:
         self._skip_whitespace()
+        token = \
+            self._skip_comment_or_build_div_operator() \
+            or self._build_eof() \
+            or self._build_one_of_number_value() \
+            or self._build_string() \
+            or self._build_operators() \
+            or self._build_one_char_tokens() \
+            or self._build_alpha_keywords_or_identifier() \
+            or self._build_currency_type_name()
 
-        token = self._skip_comment_or_build_div_operator()
-        if token:
-            return token
-
-        if self._get_char() == 'EOF':
-            return Token(TokenType.EOF, '', self._get_position())
-
-        token = self._build_one_of_number_value()
-        if token:
-            return token
-
-        token = self._build_string()
-        if token:
-            return token
-
-        token = self._build_operators()
-        if token:
-            return token
-
-        token = self._build_one_char_tokens()
-        if token:
-            return token
-
-        token = self._build_alpha_keywords_or_identifier()
-        if token:
-            return token
-
-        token = self._build_currency_type_name()
         if token:
             return token
 
@@ -76,6 +57,10 @@ class Lexer:
                 return token
         else:
             return None
+
+    def _build_eof(self) -> Optional[Token]:
+        if self._get_char() == 'EOF':
+            return Token(TokenType.EOF, '', self._get_position())
 
     def _build_alpha_keywords_or_identifier(self) -> Optional[Token]:
         keywords_dict = {
@@ -162,39 +147,22 @@ class Lexer:
             else:
                 raise LexerError('Unknown operator ":"', self._get_position())
 
-        token = self.build_two_char_operators('&&', TokenType.AND_OPERATOR)
-        if token:
-            return token
-
-        token = self.build_two_char_operators('||', TokenType.OR_OPERATOR)
-        if token:
-            return token
-
-        token = self.build_one_char_token_or_two_char_token(
-            ("!", TokenType.NEGATION_OPERATOR),
-            ("!=", TokenType.NOT_EQUAL_OPERATOR)
-        )
-        if token:
-            return token
-
-        token = self.build_one_char_token_or_two_char_token(
-            ("=", TokenType.ASSIGN_OPERATOR),
-            ("==", TokenType.EQUAL_OPERATOR)
-        )
-        if token:
-            return token
-
-        token = self.build_one_char_token_or_two_char_token(
-            ("<", TokenType.LESS_THAN_OPERATOR),
-            ("<=", TokenType.LESS_THAN_OR_EQUAL_OPERATOR)
-        )
-        if token:
-            return token
-
-        token = self.build_one_char_token_or_two_char_token(
-            (">", TokenType.GREATER_THAN_OPERATOR),
-            (">=", TokenType.GREATER_THAN_OPERATOR_OR_EQUAL)
-        )
+        token = \
+            self.build_two_char_operators('&&', TokenType.AND_OPERATOR) \
+            or self.build_two_char_operators('||', TokenType.OR_OPERATOR) \
+            or self.build_one_char_token_or_two_char_token(
+                ("!", TokenType.NEGATION_OPERATOR),
+                ("!=", TokenType.NOT_EQUAL_OPERATOR)
+            ) or self.build_one_char_token_or_two_char_token(
+                ("=", TokenType.ASSIGN_OPERATOR),
+                ("==", TokenType.EQUAL_OPERATOR)
+            ) or self.build_one_char_token_or_two_char_token(
+                ("<", TokenType.LESS_THAN_OPERATOR),
+                ("<=", TokenType.LESS_THAN_OR_EQUAL_OPERATOR)
+            ) or self.build_one_char_token_or_two_char_token(
+                (">", TokenType.GREATER_THAN_OPERATOR),
+                (">=", TokenType.GREATER_THAN_OPERATOR_OR_EQUAL)
+            )
         if token:
             return token
 
@@ -257,10 +225,10 @@ class Lexer:
 
         i = -1
         while char.isdigit():
-            if i*(-1) == MAX_NUMBER_OF_DIGITS:
+            if i * (-1) == MAX_NUMBER_OF_DIGITS:
                 raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
 
-            base = base + float(char) * 10**i
+            base = base + float(char) * 10 ** i
             last_position = self._get_position()
             self._source.next_char()
             char = self._source.get_char()
