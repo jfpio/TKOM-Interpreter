@@ -1,3 +1,4 @@
+import math
 from typing import Tuple, Optional
 
 from interpreter.lexer.lexer_error import LexerError
@@ -123,10 +124,9 @@ class Lexer:
             self._next_char()
             char = self._get_char()
 
-        if not buffer.isupper() or not len(buffer.strip()) == 3:
-            return None
-        else:
+        if len([char for char in buffer if char.isupper()]) == 3:
             return Token(TokenType.CURRENCY, buffer, self._previous_position)
+        return None
 
     def _build_one_char_tokens(self) -> Optional[Token]:
         char = self._get_char()
@@ -163,7 +163,7 @@ class Lexer:
         string = ''
 
         char = self._get_char()
-        if not char == '"':
+        if char != '"':
             return None
 
         i = 0
@@ -183,50 +183,29 @@ class Lexer:
         self._next_char()
         return token
 
+    # TODO negative number
     def _build_one_of_number_value(self) -> Optional[Token]:
-        char = self._get_char()
-        last_position = self._get_position()
-
-        if not char.isdigit():
+        if not self._get_char().isdigit():
             return None
 
-        base = 0
-        i = 0
-        while char.isdigit():
-            if i == MAX_NUMBER_OF_DIGITS:
-                raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
-            i += 1
+        base = self.build_integer_part_of_the_number()
 
-            base = base * 10 + int(char)
-            last_position = self._get_position()
-            self._source.next_char()
-            char = self._source.get_char()
-
-        if char == '.':
+        if self._get_char() == '.':
             return self._build_float_or_currency(base)
-        return Token(TokenType.INT_VALUE, base, last_position)
+        return Token(TokenType.INT_VALUE, base, self._previous_position)
 
-    def _build_float_or_currency(self, previous_base: int) -> Optional[Token]:
-        base = float(previous_base)
-
+    def _build_float_or_currency(self, integer_part: int) -> Optional[Token]:
         self._next_char()
-        char = self._get_char()
-        last_position = self._get_position()
+        if not self._get_char().isdigit():
+            raise LexerError(f"No digit after dot in float", self._get_position())
 
-        i = -1
-        while char.isdigit():
-            if i * (-1) == MAX_NUMBER_OF_DIGITS:
-                raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
+        fractional_part = self.build_integer_part_of_the_number()
+        digits = int(math.log10(fractional_part)) + 1
+        number = float(integer_part) + fractional_part * 10 ** -digits
 
-            base = base + float(char) * 10 ** i
-            last_position = self._get_position()
-            self._source.next_char()
-            char = self._source.get_char()
-            i += -1
-
-        if char.isupper() and char != 'EOF':
-            return self._build_currency(base)
-        return Token(TokenType.FLOAT_VALUE, base, last_position)
+        if self._get_char().isupper() and self._get_char() != 'EOF':
+            return self._build_currency(number)
+        return Token(TokenType.FLOAT_VALUE, number, self._previous_position)
 
     def _build_currency(self, previous_base: float) -> Optional[Token]:
         number = previous_base
@@ -287,6 +266,20 @@ class Lexer:
             token = Token(token_type, '', self._get_position())
             self._next_char()
             return token
+
+    def build_integer_part_of_the_number(self) -> int:
+        char = self._get_char()
+        base = 0
+        i = 0
+        while char.isdigit():
+            if i == MAX_NUMBER_OF_DIGITS:
+                raise LexerError(f"Too many digits in number (above {MAX_NUMBER_OF_DIGITS})", self._get_position())
+            i += 1
+
+            base = base * 10 + int(char)
+            self._next_char()
+            char = self._get_char()
+        return base
 
 
 def tokens_generator(lexer):
