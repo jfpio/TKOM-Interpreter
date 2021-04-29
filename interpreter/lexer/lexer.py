@@ -71,7 +71,7 @@ class Lexer:
                 self._skip_comment()
                 self._next_char()
             else:
-                token = Token(TokenType.DIV_OPERATOR, '', self._get_position())
+                token = Token(TokenType.DIV_OPERATOR, '', self._previous_position)
                 self._next_char()
                 return token
         else:
@@ -161,6 +161,14 @@ class Lexer:
                 return token
             else:
                 raise LexerError('Unknown operator ":"', self._get_position())
+
+        token = self.build_two_char_operators('&&', TokenType.AND_OPERATOR)
+        if token:
+            return token
+
+        token = self.build_two_char_operators('||', TokenType.OR_OPERATOR)
+        if token:
+            return token
 
         token = self.build_one_char_token_or_two_char_token(
             ("!", TokenType.NEGATION_OPERATOR),
@@ -315,6 +323,16 @@ class Lexer:
             return token
         else:
             return Token(one_char_token_type, '', self._previous_position)
+
+    def build_two_char_operators(self, token_value: str, token_type: TokenType) -> Optional[Token]:
+        if self._get_char() != token_value[0]:
+            return None
+
+        self._next_char()
+        if self._get_char() == token_value[1]:
+            token = Token(token_type, '', self._get_position())
+            self._next_char()
+            return token
 
 
 def tokens_generator(lexer):
