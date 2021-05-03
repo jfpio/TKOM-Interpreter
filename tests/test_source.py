@@ -36,7 +36,7 @@ class TestSource:
                 SourcePosition(1, 4),
                 SourcePosition(2, 1),
                 SourcePosition(2, 2),
-                SourcePosition(3, 0)
+                SourcePosition(4, 0)
             ]
 
     @staticmethod
