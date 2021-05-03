@@ -26,11 +26,20 @@ class TestSingleTokens:
         with pytest.raises(LexerError):
             self._get_first_token(big_int_string)
 
+    def test_unterminated_string(self):
+        with pytest.raises(LexerError, match=r"Can't match any token"):
+            self._get_first_token('"abc')
+
     def test_get_float(self):
         token = self._get_first_token('111.1')
         assert token.type == TokenType.FLOAT_VALUE
         assert token.value == 111.1
         assert token.source_position == SourcePosition(1, 5)
+
+    def test_float_no_fraction_part(self):
+        # float = int, '.' , DIGIT, {DIGIT};
+        with pytest.raises(LexerError,  match=r"No digit after dot in float"):
+            self._get_first_token('4.')
 
     def test_get_currency(self):
         token = self._get_first_token('111.1USD')

@@ -173,6 +173,8 @@ class Lexer:
         while char != '"':
             if i == MAX_STRING:
                 raise LexerError(f"Too many char in string (above {MAX_STRING})", self._get_position())
+            if char == 'EOF':
+                raise LexerError("Can't match any token, unterminated string", self._get_position())
             i += 1
 
             string += char
@@ -183,7 +185,6 @@ class Lexer:
         self._next_char()
         return token
 
-    # TODO negative number
     def _build_one_of_number_value(self) -> Optional[Token]:
         if not self._get_char().isdigit():
             return None
