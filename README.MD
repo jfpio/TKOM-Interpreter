@@ -6,3 +6,6 @@ Jan Piotrowski
 
 # Run tests
 `$ pytest`
+
+# Static Type Checking
+`$ mypy ./`

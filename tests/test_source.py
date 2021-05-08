@@ -1,5 +1,5 @@
 import io
-
+from typing import Tuple, List
 from interpreter.source.source import Source
 from interpreter.source.source_position import SourcePosition
 
@@ -36,11 +36,11 @@ class TestSource:
                 SourcePosition(1, 4),
                 SourcePosition(2, 1),
                 SourcePosition(2, 2),
-                SourcePosition(3, 0)
+                SourcePosition(4, 0)
             ]
 
     @staticmethod
-    def get_char_and_positions_from_source(source) -> ([], []):
+    def get_char_and_positions_from_source(source) -> Tuple[List, List]:
         char_list = []
         position_list = []
 
