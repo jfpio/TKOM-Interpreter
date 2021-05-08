@@ -1,0 +1,797 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Projekt TKOM - Dokumentacja wstępna</title><style>
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC", "Songti SC", "SimSun", "Nanum Myeongjo", NanumMyeongjo, Batang, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC', 'Noto Sans CJK KR'; }
+
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK KR'; }
+
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, YuMincho, "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC", "Songti SC", "SimSun", "Nanum Myeongjo", NanumMyeongjo, Batang, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC', 'Noto Sans CJK KR'; }
+
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK KR'; }
+
+.highlight-default {
+}
+.highlight-gray {
+	color: rgb(155,154,151);
+}
+.highlight-brown {
+	color: rgb(100,71,58);
+}
+.highlight-orange {
+	color: rgb(217,115,13);
+}
+.highlight-yellow {
+	color: rgb(223,171,1);
+}
+.highlight-teal {
+	color: rgb(15,123,108);
+}
+.highlight-blue {
+	color: rgb(11,110,153);
+}
+.highlight-purple {
+	color: rgb(105,64,165);
+}
+.highlight-pink {
+	color: rgb(173,26,114);
+}
+.highlight-red {
+	color: rgb(224,62,62);
+}
+.highlight-gray_background {
+	background: rgb(235,236,237);
+}
+.highlight-brown_background {
+	background: rgb(233,229,227);
+}
+.highlight-orange_background {
+	background: rgb(250,235,221);
+}
+.highlight-yellow_background {
+	background: rgb(251,243,219);
+}
+.highlight-teal_background {
+	background: rgb(221,237,234);
+}
+.highlight-blue_background {
+	background: rgb(221,235,241);
+}
+.highlight-purple_background {
+	background: rgb(234,228,242);
+}
+.highlight-pink_background {
+	background: rgb(244,223,235);
+}
+.highlight-red_background {
+	background: rgb(251,228,228);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(55, 53, 47, 0.6);
+	fill: rgba(55, 53, 47, 0.6);
+}
+.block-color-brown {
+	color: rgb(100,71,58);
+	fill: rgb(100,71,58);
+}
+.block-color-orange {
+	color: rgb(217,115,13);
+	fill: rgb(217,115,13);
+}
+.block-color-yellow {
+	color: rgb(223,171,1);
+	fill: rgb(223,171,1);
+}
+.block-color-teal {
+	color: rgb(15,123,108);
+	fill: rgb(15,123,108);
+}
+.block-color-blue {
+	color: rgb(11,110,153);
+	fill: rgb(11,110,153);
+}
+.block-color-purple {
+	color: rgb(105,64,165);
+	fill: rgb(105,64,165);
+}
+.block-color-pink {
+	color: rgb(173,26,114);
+	fill: rgb(173,26,114);
+}
+.block-color-red {
+	color: rgb(224,62,62);
+	fill: rgb(224,62,62);
+}
+.block-color-gray_background {
+	background: rgb(235,236,237);
+}
+.block-color-brown_background {
+	background: rgb(233,229,227);
+}
+.block-color-orange_background {
+	background: rgb(250,235,221);
+}
+.block-color-yellow_background {
+	background: rgb(251,243,219);
+}
+.block-color-teal_background {
+	background: rgb(221,237,234);
+}
+.block-color-blue_background {
+	background: rgb(221,235,241);
+}
+.block-color-purple_background {
+	background: rgb(234,228,242);
+}
+.block-color-pink_background {
+	background: rgb(244,223,235);
+}
+.block-color-red_background {
+	background: rgb(251,228,228);
+}
+.select-value-color-default { background-color: rgba(206,205,202,0.5); }
+.select-value-color-gray { background-color: rgba(155,154,151, 0.4); }
+.select-value-color-brown { background-color: rgba(140,46,0,0.2); }
+.select-value-color-orange { background-color: rgba(245,93,0,0.2); }
+.select-value-color-yellow { background-color: rgba(233,168,0,0.2); }
+.select-value-color-green { background-color: rgba(0,135,107,0.2); }
+.select-value-color-blue { background-color: rgba(0,120,223,0.2); }
+.select-value-color-purple { background-color: rgba(103,36,222,0.2); }
+.select-value-color-pink { background-color: rgba(221,0,129,0.2); }
+.select-value-color-red { background-color: rgba(255,0,26,0.2); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="d1502f8c-be85-454f-ab52-fb1e685409e9" class="page sans"><header><h1 class="page-title">Projekt TKOM - Dokumentacja wstępna</h1></header><div class="page-body"><h1 id="e46c4e96-2f8c-4bed-bb19-fe1adc3bf969" class="">Koncepcja</h1><h3 id="89a9b1d1-fede-4aac-ba14-fa3831b91fac" class="">Temat</h3><p id="6538900d-3029-4ae8-98be-ae3bee2a6765" class="">Interpreter języka z możliwością definiowania własnych typów walut.</p><h3 id="21c3027c-cbeb-4745-9b77-64c63458f117" class="">Semantyka</h3><ul id="af0f9ae6-0927-4f43-9306-3ce48c0ee116" class="bulleted-list"><li>Typowanie statyczne i silne</li></ul><ul id="97088902-6f6a-47e0-adc2-5ac7edfe94eb" class="bulleted-list"><li>Zmienne mutowalne</li></ul><ul id="5a9a67cd-f0ec-4610-a814-16a002fc48a4" class="bulleted-list"><li>Do funkcji przekazujemy argumenty przez wartość</li></ul><h3 id="2dde00e4-09e5-40e2-91e7-d8b16aaf39dc" class="">Sposób działania</h3><p id="481a2c6d-f983-430b-a257-62bc1e83412e" class="">Program interpretera będzie zawierał plik currency.json, który będzie posiadał zdefiniowane waluty i ich kursy. Każda waluta podana w tym pliku będzie nowym typem w języku. Język rzutuje jedną walutę na drugą używając kursu walut.</p><h1 id="1e0d4e18-5eca-4fd0-96c2-09ff9b3990b3" class="">Przykłady wykorzystania języka</h1><h3 id="6d2db284-5b52-4088-a97a-40f75d68711d" class="">Definiowanie walut</h3><pre id="1eb832a4-d86d-4df3-83d9-1524164c166d" class="code"><code>USD := 3.92; /* 4.52 of universial unit */
+EUR := 4.53;
+PLN := 1;</code></pre><h3 id="54e06bc6-af7b-4084-8166-813c3b499917" class="">Porównanie walut</h3><pre id="b98cac53-8377-4989-8e01-ca236d64c3a4" class="code"><code>1EUR == 4.52PLN /* true */</code></pre><h3 id="818c046e-9f42-418f-9f18-1e329a16f1bb" class="">Konkatenacja stringów</h3><pre id="7cdfc7d8-7937-4161-912f-1b107072840d" class="code"><code>&quot;aaa&quot; + &quot;bbb&quot; /* &quot;aaabbb&quot; */</code></pre><h3 id="6c623254-acb5-4b07-bf45-2927b5b293bf" class="">Dodawanie z przewalutowaniem</h3><pre id="c05e5013-3f8d-4fe8-9f79-42ebebd87f82" class="code"><code>USD a = 1USD;
+EUR b = 2EUR;
+PLN c = 3PLN;
+USD sum = a + b + c; /* 4.16USD */</code></pre><h3 id="d00bacc8-0049-4999-84c5-70de749f2d20" class="">Procent składany - rekurencja</h3><pre id="000b3925-059d-4acd-9a26-dc294c2afe0e" class="code"><code>int power(float basis, int exponent) {
+    if (exponent == 0) {
+        return 1;
+    }
+    return basis * power(basis, exponent - 1);
+}
+
+USD compound_interest(USD capital, float interest_rate, int number_of_times) {
+    return capital * power(1+interest_rate, number_of_times);
+}
+
+compound_interest(10USD, 0.05, 5); /* 12.762815USD */</code></pre><h3 id="f01d1253-fab0-4af4-a8cf-22f9ed586f2f" class="">Procent składany - pętla:</h3><pre id="8c11e809-0eee-415b-80ce-d5fc1e444813" class="code"><code>USD compound_interest(USD capital, float interest_rate, int number_of_times) {
+    int i = number_of_times;
+    USD sum = capital;
+
+    while(i == 0) {
+        sum = sum * (1 + interest_rate);
+        i = i - 1;       
+    }
+    return sum;
+}
+compound_interest(10USD, 0.05, 5); /* 12.762815USD */</code></pre><h3 id="3015bbed-cf72-4d6a-8088-6657e8c48fcd" class="">Porównania z rzutowaniem</h3><pre id="4db6dd2c-2c95-4165-b1c0-2b39011133c7" class="code"><code>int after_how_many_years_dollar_account_rise_to_value_in_pln(USD capital, float interest_rate, PLN value) {
+    
+    USD sum = capital;
+    int counter = 0;
+
+    while(capital &gt; (USD) value) {
+        sum = sum * (1 + interest_rate);
+        counter = counter + 1;     
+    }
+
+    return counter;
+}
+after_how_many_years_dollar_account_rise_to_value_in_pln(10USD, 0.05, 60PLN) /* 10 */</code></pre><h1 id="735051b1-2978-4a6a-b1ce-7517d841009e" class="">Obsługa błędów</h1><ul id="73ed0aff-0447-493a-9269-809c60908e03" class="bulleted-list"><li>Błąd syntaktyczny -  gdy interpreter znajdzie błędny znak lub błędnie umieszczony znak zgłasza błąd wskazując kolumnę i linijkę oraz przerywa działanie</li></ul><ul id="5b90b722-d060-4828-8bac-d8fb3b793d15" class="bulleted-list"><li>Błąd typowania -  gdy interpreter znajdzie błędny znak lub błędnie umieszczony typ zgłasza błąd wskazując kolumnę i linijkę oraz przerywa działanie </li></ul><ul id="1986b0c6-4b18-4262-8c07-086874432092" class="bulleted-list"><li>Błąd arytmetyczny (np. dzielenie przez zero) - wskazanie miejsca i przerwanie działania</li></ul><ul id="ca0dbebf-28c9-45c1-ba74-96c7529108d7" class="bulleted-list"><li>Błąd nazwy - wskazanie miejsca i przerwanie działania</li></ul><h1 id="b9809942-6736-4412-8c90-21e45b9cc70f" class="">Gramatyka języka</h1><pre id="e2a990ba-cfeb-4432-ad62-7dcd81d4a32f" class="code"><code>program = declaration, {declaration}, {comment};
+
+declaration = 
+   varDeclaration
+   | functionDeclaration
+;
+comment = &quot;/*&quot;, {string} &quot;*/&quot;;
+
+(* VARIABLE *)
+varDeclaration = type, varDeclarationInit;
+varDeclarationInit = varDeclarationId, [&#x27;=&#x27;, simpleExpression];
+varDeclarationId = ID;
+
+(* FUNCTION *)
+functionDeclaration = [type], ID, &quot;(&quot;, parms, &quot;)&quot;, statement;
+parms = {type, ID};
+
+(* STATEMENTS *)
+statement = 
+   expressionStatement
+   | compoundStatement
+   | ifStatement
+   | whileStatement
+   | returnStatement
+   | exceptionStatement
+;
+
+returnStatement = &quot;return&quot;, [expressionStatement], &quot;;&quot;;
+whileStatement = &quot;while&quot;, &quot;(&quot;, simpleExpression, &quot;)&quot;, statement;
+ifStatement = &quot;if&quot;, &quot;(&quot; simpleExpression, &quot;)&quot;, statement;
+compoundStatement = &quot;{&quot;, {varDeclaration}, {statement} &quot;}&quot;;
+expressionStatement = [expression], &quot;;&quot;;
+exceptionStatement = &quot;try&quot;, statement, [&quot;catch&quot;, statement];
+
+(* Expressions*)
+expression =
+   (mutable, &quot;=&quot;, expression)
+   | simpleExpression
+;
+
+simpleExpression = {simpleExpression, &quot;or&quot;}, andExpression;
+andExpression = {andExpression, &quot;and&quot;}, reliatonshipExpression;
+reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
+sumExpression = sumExpression, sumOperand, multiplyExpression;
+multiplyExpression = [multiplyExpression, multiplyOperand], factor;
+
+factor = [&quot;(&quot;, type, &quot;)&quot;],
+   (
+      immutable
+      | mutable
+   )
+;
+immutable = 
+   &quot;(&quot;, expression, &quot;)&quot; 
+   | call
+   | constant
+   ;
+
+mutable = ID;
+call = ID, &quot;(&quot;, args, &quot;)&quot;;
+args = {exp};
+constant = 
+   int
+   | float
+   | string
+   | bool
+   | currency
+;
+
+reliatonshipOperand = 
+   &quot;&lt;=&quot;
+   | &quot;&lt;&quot;
+   | &quot;&gt;&quot;,
+   | &quot;&gt;=&quot;,
+   | &quot;==&quot;,
+   | &quot;!=&quot;
+;
+sumOperand = 
+   &quot;+&quot;
+   | &quot;-&quot;
+;
+multiplyOperand =
+   &quot;*&quot;
+   | &quot;/&quot;
+   | &quot;%&quot;
+;
+
+type = 
+   &quot;int&quot;
+   | &quot;float&quot;
+   | &quot;string&quot;
+   | &quot;bool&quot;
+   | CURRENCY_NAME
+;
+
+int = 
+   [-]
+   ,
+   &quot;0&quot; 
+   | &quot;1-9&quot;,{DIGIT}
+;
+
+float =
+   int, &#x27;.&#x27; , DIGIT, {DIGIT}
+;
+
+currency = 
+   (
+      int 
+      | float
+   )
+   ,
+   CURRENCY_NAME
+;
+
+string = &quot;&#x27;&quot;, {CHAR} &quot;&#x27;&quot;;
+
+ID = LETTER, {DIGIT | LETTER};
+DIGIT = &quot;0-9&quot;;
+LETTER =
+   &quot;a-z&quot;
+   | &quot;A-Z&quot;
+;
+SYMBOL = &quot;[&quot; | &quot;]&quot; | &quot;{&quot; | &quot;}&quot; | &quot;(&quot; | &quot;)&quot; | &quot;&lt;&quot; | &quot;&gt;&quot; | &quot;&#x27;&quot; | &#x27;&quot;&#x27; | &quot;=&quot; | &quot;|&quot; | &quot;.&quot; | &quot;,&quot; | &quot;;&quot; &quot;_&quot;;
+
+CHAR = 
+   DIGIT
+   | LETTER
+   | SYMBOL
+;
+
+CURRENCY_NAME = ; (*I.E. &#x27;PLN&#x27; | &#x27;EUR&#x27; | &#x27;USD&#x27;;*)</code></pre><p id="648834ba-1c41-43c0-a2e1-4e3363bca179" class=""><a href="https://gitlab-stud.elka.pw.edu.pl/jpiotro1/tkom-jezyk-dla-walut/-/blob/master/grammatic.ebnf">Repozytorium Git na Gitlabie wydziału</a></p><h1 id="a537f3a3-fdcd-4dc7-b028-8c5e3a251917" class="">Organizacja projektu</h1><p id="39915f62-856f-401c-9724-2a6273a10415" class="">Projekt będzie implementowany w Pythonie.</p><p id="1ad9bfd7-7873-4a94-b47c-f246d1fd7254" class="">W funkcji main będą instancje 3 obiektów:</p><ul id="7dc2a28c-33ea-47dc-96ec-e5322e004787" class="bulleted-list"><li>Skaner - pobiera dane z wejścia (plik lub string), oraz za pomocą metody get_expression przekazuje dane do znaku końca instrukcji &quot;;&quot;</li></ul><ul id="ff97e83c-c6b8-409c-b393-c079ecce4b5a" class="bulleted-list"><li>Parser - pobiera dane po instrukcji do instrukcji od skanera. Odbywa się na jego poziomie analiza składniowa i leksykalna. Tokenizuje on dane.</li></ul><ul id="73f5ef1d-391c-4baf-a195-697c3883bf29" class="bulleted-list"><li>Executor - pobiera on dane od Parsera i wykonuje kod programu.</li></ul><p id="bd080894-e41b-42fe-ae80-72a26f4d001e" class="">
+</p><h1 id="511e0137-fd79-4853-8b44-e206b367eb40" class="">Konwencje</h1><ul id="cdae32bd-0d84-4dab-8323-f70fdefee8fe" class="bulleted-list"><li>currency tylko jako float</li></ul><ul id="b8f32ef6-907b-49fe-9030-19f00e23ceae" class="bulleted-list"><li>Id może być pisane tylko snake_casem, bez wielkich liter</li></ul><ul id="940c6040-61b3-4cc5-ba55-c04e5f4f5435" class="bulleted-list"><li>Nazwa waluty ma 3 znaki z dużej litery</li></ul></div></article></body></html>

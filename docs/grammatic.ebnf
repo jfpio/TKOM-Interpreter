@@ -28,10 +28,9 @@ ifStatement = "if", "(" expression, ")", "{", statement "}";
 compoundStatement = {varDeclaration}, {assignment}, {statement};
 
 (* Expressions*)
-(* rekursja lewostronna - naprawić *)
 expression = andExpression, {"or", expression};
-andExpression = reliatonshipExpression, {"and", andExpression};
-reliatonshipExpression = sumExpression, [reliatonshipOperand, sumExpression];
+andExpression = relationshipExpression, {"and", andExpression};
+relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
 sumExpression = multiplyExpression, sumOperand, sumExpression;
 multiplyExpression = factor, [multiplyOperand, multiplyExpression];
 
@@ -61,7 +60,7 @@ constant =
    | currency
 ;
 
-reliatonshipOperand = 
+relationshipExpression =
    "<="
    | "<"
    | ">",
@@ -86,6 +85,7 @@ type =
    | "float"
    | "string"
    | "bool"
+   | "void"
    | currency_ID
 ;
 
@@ -95,7 +95,7 @@ currency = (int | float), currency_ID;
 
 string = "'", {CHAR} "'";
 
-ID = LETTER, {DIGIT | LETTER};
+ID = SMALL_LETTER, {"_" | SMALL_LETTER};
 currency_ID = CAPITAL_LETTER, CAPITAL_LETTER, CAPITAL_LETTER; 
 
 CHAR = 
