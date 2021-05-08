@@ -23,6 +23,33 @@ class TestIntegratedTokens:
             Token(TokenType.EOF, '', SourcePosition(2, 0)),
         ]
 
+    def test_get_currency_float(self):
+        tokens = self._get_tokens("3.92USD")
+        tokens = [(token.type, token.value) for token in tokens]
+        assert tokens == [
+            (TokenType.FLOAT_VALUE, 3.92),
+            (TokenType.CURRENCY, 'USD'),
+            (TokenType.EOF, '')
+        ]
+
+    def test_get_currency_integer(self):
+        tokens = self._get_tokens("3USD")
+        tokens = [(token.type, token.value) for token in tokens]
+        assert tokens == [
+            (TokenType.INT_VALUE, 3),
+            (TokenType.CURRENCY, 'USD'),
+            (TokenType.EOF, '')
+        ]
+
+    def test_currency_with_space(self):
+        tokens = self._get_tokens("4.1 EUR")
+        tokens = [(token.type, token.value) for token in tokens]
+        assert tokens == [
+            (TokenType.FLOAT_VALUE, 4.1),
+            (TokenType.CURRENCY, 'EUR'),
+            (TokenType.EOF, '')
+        ]
+
     def test_currency_assignment(self):
         tokens = self._get_tokens("USD := 3.92;")
         token_types = [token.type for token in tokens]

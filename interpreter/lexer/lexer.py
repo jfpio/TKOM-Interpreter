@@ -192,10 +192,10 @@ class Lexer:
         base = self.build_integer_part_of_the_number()
 
         if self._get_char() == '.':
-            return self._build_float_or_currency(base)
+            return self._build_float(base)
         return Token(TokenType.INT_VALUE, base, self._previous_position)
 
-    def _build_float_or_currency(self, integer_part: int) -> Optional[Token]:
+    def _build_float(self, integer_part: int) -> Optional[Token]:
         self._next_char()
         if not self._get_char().isdigit():
             raise LexerError(f"No digit after dot in float", self._get_position())
@@ -203,9 +203,6 @@ class Lexer:
         fractional_part = self.build_integer_part_of_the_number()
         digits = int(math.log10(fractional_part)) + 1
         number = float(integer_part) + fractional_part * 10 ** -digits
-
-        if self._get_char().isupper() and self._get_char() != 'EOF':
-            return self._build_currency(number)
         return Token(TokenType.FLOAT_VALUE, number, self._previous_position)
 
     def _build_currency(self, previous_base: float) -> Optional[Token]:

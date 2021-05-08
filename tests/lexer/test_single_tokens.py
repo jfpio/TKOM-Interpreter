@@ -41,12 +41,6 @@ class TestSingleTokens:
         with pytest.raises(LexerError,  match=r"No digit after dot in float"):
             self._get_first_token('4.')
 
-    def test_get_currency(self):
-        token = self._get_first_token('111.1USD')
-        assert token.type == TokenType.CURRENCY_VALUE
-        assert token.value == '111.1USD'
-        assert token.source_position == SourcePosition(1, 8)
-
     def test_string(self):
         token = self._get_first_token('"abc"')
         assert token.type == TokenType.STRING_VALUE
@@ -253,6 +247,7 @@ class TestSingleTokens:
         token = self._get_first_token('return')
         assert token.type == TokenType.RETURN_NAME
         assert token.source_position == SourcePosition(1, 6)
+
 
     @staticmethod
     def _get_first_token(string: str) -> Token:
