@@ -83,12 +83,13 @@ class Lexer:
                 token = Token(TokenType.DIV_OPERATOR, '', self._previous_position)
                 self._next_char()
                 return token
-        else:
-            return None
+
+        return None
 
     def _build_eof(self) -> Optional[Token]:
         if self._get_char() == 'EOF':
             return Token(TokenType.EOF, '', self._get_position())
+        return None
 
     def _build_alpha_keywords_or_identifier(self) -> Optional[Token]:
         buffer = ''
@@ -259,6 +260,8 @@ class Lexer:
             token = Token(token_type, '', self._get_position())
             self._next_char()
             return token
+
+        return None
 
     def build_integer_part_of_the_number(self) -> int:
         char = self._get_char()

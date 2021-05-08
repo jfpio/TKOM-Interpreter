@@ -1,5 +1,5 @@
 import io
-
+from typing import List
 import pytest
 
 from interpreter.lexer.lexer import Lexer, tokens_generator
@@ -129,7 +129,7 @@ class TestIntegratedTokens:
         ]
 
     @staticmethod
-    def _get_tokens(string: str) -> [Token]:
+    def _get_tokens(string: str) -> List[Token]:
         source = Source(io.StringIO(string))
         lexer = Lexer(source)
 
