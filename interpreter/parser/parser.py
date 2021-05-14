@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from interpreter.lexer.lexer import Lexer
+from interpreter.models.declarations import Declaration, CurrencyDeclaration
+from interpreter.models.base import Currency
 from interpreter.parser.parser_error import ParserError
-from interpreter.semantics import Declaration, CurrencyDeclaration
 from interpreter.token.token_type import TokenType
 
 

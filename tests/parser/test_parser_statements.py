@@ -3,9 +3,9 @@ from typing import List
 import pytest
 
 from interpreter.lexer.lexer import Lexer
+from interpreter.models.declarations import CurrencyDeclaration, Declaration
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
-from interpreter.semantics import Declaration, CurrencyDeclaration
 from interpreter.source.source import Source
 
 

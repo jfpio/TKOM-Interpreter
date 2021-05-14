@@ -1,5 +1,6 @@
 program = declaration, {declaration};
 
+(*function declaration and varDeclaration have same beggining, but I think that this is more clear*)
 declaration = varDeclaration 
    | functionDeclaration
    | currencyDeclaration
@@ -8,11 +9,9 @@ declaration = varDeclaration
 (* CURRENCY *)
 currencyDeclaration = currency_ID, ":=", float | int, ";";
 (* VARIABLE *)
-varDeclaration = type, varDeclarationInit;
-varDeclarationInit = ID, ['=', expression];
-
+varDeclaration = type, ID, ['=', expression];
 (* FUNCTION *)
-functionDeclaration = [type], ID, "(", parms, ")", "{", statement, "}";
+functionDeclaration = type, ID, "(", parms, ")", "{", statement, "}";
 parms = {type, ID};
 
 (* STATEMENTS *)
@@ -25,32 +24,26 @@ statement = compoundStatement
 returnStatement = "return", [expression], ";";
 whileStatement = "while", "(", expression, ")", "{", statement "}";
 ifStatement = "if", "(" expression, ")", "{", statement "}";
-compoundStatement = {varDeclaration}, {assignment}, {statement};
+compoundStatement = {varDeclaration | assignment | statement};
+
 
 (* Expressions*)
-expression = andExpression, {"or", expression};
-andExpression = relationshipExpression, {"and", andExpression};
+expression = andExpression, {"or", andExpression};
+andExpression = relationshipExpression, {"and", relationshipExpression};
 relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
-sumExpression = multiplyExpression, sumOperand, sumExpression;
-multiplyExpression = factor, [multiplyOperand, multiplyExpression];
+sumExpression = multiplyExpression, {sumOperand, multiplyExpression};
+multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
+typeCastingFactor = ["(", type, ")"], negationFactor;
+negationFactor = ["!"], factor;
 
-assignment = (mutable, "=", expression);
-factor = ["(", type, ")"],(
-      immutable
-      | mutable
-   )
+assignment = (ID, "=", expression);
+factor = 
+   "(", expression, ")"
+   | (ID, [("(", args, ")"]) (*variable or function call*) 
+   | constant
 ;
 
-immutable =
-   ["!"], (
-      "(", expression, ")" 
-      | call
-      | constant
-   )
-   ;
 
-mutable = ID;
-call = ID, "(", args, ")";
 args = {expression};
 constant = 
    int
@@ -60,7 +53,7 @@ constant =
    | currency
 ;
 
-relationshipExpression =
+relationshipOperand =
    "<="
    | "<"
    | ">",
