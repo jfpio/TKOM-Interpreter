@@ -8,17 +8,17 @@ class Node(ABC):
     pass
 
 
-class Statement(ABC):
+class Declaration(ABC):
     pass
 
 
 @dataclass(frozen=True)
-class CurrencyDeclaration(Statement):
+class CurrencyDeclaration(Declaration):
     name: str
     value: Union[int, float]
 
 
-class FunctionDeclaration(Statement):
+class FunctionDeclaration(Declaration):
     def __init__(self, id, params, block):
         self.id = id
         self.params = params

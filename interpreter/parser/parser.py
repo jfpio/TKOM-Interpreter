@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.parser.parser_error import ParserError
-from interpreter.semantics import Node, Statement, CurrencyDeclaration
+from interpreter.semantics import Declaration, CurrencyDeclaration
 from interpreter.token.token_type import TokenType
 
 
@@ -20,17 +20,17 @@ class Parser:
                 return True
         raise ParserError(self.token.source_position, self.token.type, args)
 
-    def parse_program(self) -> List[Statement]:
+    def parse_program(self) -> List[Declaration]:
         statements = []
         while self.token.type != TokenType.EOF:
-            statements.append(self.parse_statement())
+            statements.append(self.parse_declarations())
         return statements
 
-    def parse_statement(self) -> Statement:
+    def parse_declarations(self) -> Declaration:
         if self.token.type == TokenType.CURRENCY:
-            return self.parse_currency_assignment()
+            return self.parse_currency_declarations()
 
-    def parse_currency_assignment(self) -> CurrencyDeclaration:
+    def parse_currency_declarations(self) -> CurrencyDeclaration:
         """
         currencyDeclaration = currency_ID, ":=", float | int, ";";
         """
