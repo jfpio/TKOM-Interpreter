@@ -1,4 +1,7 @@
+import string
 from abc import ABC
+from dataclasses import dataclass
+from typing import Union
 
 
 class Node(ABC):
@@ -9,10 +12,10 @@ class Statement(ABC):
     pass
 
 
+@dataclass(frozen=True)
 class CurrencyDeclaration(Statement):
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+    name: str
+    value: Union[int, float]
 
 
 class FunctionDeclaration(Statement):
