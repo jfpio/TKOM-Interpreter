@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Union, List
 
 from interpreter.models.constants import Types
+from interpreter.source.source_position import SourcePosition
 
 
 @dataclass
@@ -13,6 +14,13 @@ class Currency:
 @dataclass
 class Constant:
     value: Union[str, int, float, bool, Currency]
+    source_position: SourcePosition
+
+
+@dataclass
+class Variable:
+    id: str
+    source_position: SourcePosition
 
 
 @dataclass

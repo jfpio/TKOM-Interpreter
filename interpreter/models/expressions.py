@@ -5,10 +5,6 @@ from interpreter.models.constants import Types, RelationshipOperator, SumOperato
 from interpreter.models.base import Currency, Constant, FunctionCall
 
 
-class Factor:
-    pass
-
-
 @dataclass
 class NegationFactor:
     factor: Union['Expression', FunctionCall, Constant]
