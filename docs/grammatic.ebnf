@@ -16,9 +16,9 @@ parms = {type, ID};
 
 (* STATEMENTS *)
 statement = (compoundStatement
-      | ifStatement
-      | whileStatement
-      | returnStatement
+   | ifStatement
+   | whileStatement
+   | returnStatement
    ), ";"
 ;
 

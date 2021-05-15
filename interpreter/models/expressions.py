@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Union, Tuple, Optional
 
-from interpreter.models.constants import Types, RelationshipOperator, SumOperator, MulOperator
-from interpreter.models.base import Currency, Constant, FunctionCall
+from interpreter.models.constants import Types, RelationshipOperator, SumOperator, MulOperator, CurrencyType
+from interpreter.models.base import Constant, FunctionCall
 
 
 @dataclass
@@ -14,26 +14,26 @@ class NegationFactor:
 @dataclass
 class TypeCastingFactor:
     negation_factor: NegationFactor
-    castType: Optional[Union[Types, Currency]] = None
+    castType: Optional[Union[Types, CurrencyType]] = None
 
 
 @dataclass
 class MultiplyExpression:
     type_casting_factor: TypeCastingFactor
-    right_side: List[Tuple[MulOperator, TypeCastingFactor]]
+    right_side: List[Tuple[MulOperator, TypeCastingFactor]] = field(default_factory=lambda: [])
 
 
 @dataclass
 class SumExpression:
     multiplyExpression: MultiplyExpression
-    right_side: List[Tuple[SumOperator, MultiplyExpression]]
+    right_side: List[Tuple[SumOperator, MultiplyExpression]] = field(default_factory=lambda: [])
 
 
 @dataclass
 class RelationshipExpression:
     left_side: SumExpression
-    operator: RelationshipOperator
-    right_side: SumExpression
+    operator: Optional[RelationshipOperator] = None
+    right_side: Optional[SumExpression] = None
 
 
 @dataclass

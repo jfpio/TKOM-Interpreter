@@ -1,10 +1,10 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import token_type_into_relationship_operand, token_type_into_sum_operator, \
     token_type_into_mul_operator, Types, token_type_into_types, CurrencyType
 from interpreter.models.declarations import Declaration, CurrencyDeclaration
-from interpreter.models.base import Currency, FunctionCall, Constant, Variable
+from interpreter.models.base import FunctionCall, Constant, Variable
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
 from interpreter.parser.parser_error import ParserError
@@ -81,10 +81,12 @@ class Parser:
         relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
         """
         left_side = self.parse_sum_expression()
-        operator = token_type_into_relationship_operand(self.token.type)
-        self.next_token()
-        right_side = self.parse_sum_expression()
-        return RelationshipExpression(left_side, operator, right_side)
+        if self.token.type in token_type_into_relationship_operand:
+            operator = token_type_into_relationship_operand[self.token.type]
+            self.next_token()
+            right_side = self.parse_sum_expression()
+            return RelationshipExpression(left_side, operator, right_side)
+        return RelationshipExpression(left_side)
 
     def parse_sum_expression(self) -> SumExpression:
         """
@@ -93,7 +95,7 @@ class Parser:
         left_side = self.parse_multiply_expression()
         right_side = []
         while self.token.type in [TokenType.ADD_OPERATOR, TokenType.SUB_OPERATOR]:
-            add_operator = token_type_into_sum_operator(self.token.type)
+            add_operator = token_type_into_sum_operator[self.token.type]
             self.next_token()
             expression = self.parse_multiply_expression()
             right_side.append((add_operator, expression))
@@ -106,7 +108,7 @@ class Parser:
         left_side = self.parse_type_casting_factor()
         right_side = []
         while self.token.type in [TokenType.MUL_OPERATOR, TokenType.DIV_OPERATOR, TokenType.MODULO_OPERATOR]:
-            mul_operator = token_type_into_mul_operator(self.token.type)
+            mul_operator = token_type_into_mul_operator[self.token.type]
             self.next_token()
             expression = self.parse_type_casting_factor()
             right_side.append((mul_operator, expression))
@@ -195,7 +197,7 @@ class Parser:
         ;
         """
         if self.token.type in token_type_into_types:
-            type = token_type_into_types(self.token.type)
+            type = token_type_into_types[self.token.type]
             self.next_token()
             return type
         elif self.token.type == TokenType.CURRENCY:

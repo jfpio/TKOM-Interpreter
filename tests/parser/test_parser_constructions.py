@@ -2,7 +2,6 @@ import io
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Constant, Variable
-from interpreter.models.expressions import NegationFactor
 from interpreter.parser.parser import Parser
 from interpreter.source.source import Source
 from interpreter.source.source_position import SourcePosition
@@ -18,16 +17,6 @@ class TestParserConstructions:
         parser = self._get_parser('abc')
         variable = parser.parse_factor()
         assert variable == Variable('abc', SourcePosition(1, 3))
-
-    def test_parse_negation_factor_1(self):
-        parser = self._get_parser('!false')
-        negation_factor = parser.parse_negation_factor()
-        assert negation_factor == NegationFactor(Constant(False, SourcePosition(1, 6)), True)
-
-    def test_parse_negation_factor_2(self):
-        parser = self._get_parser('true')
-        negation_factor = parser.parse_negation_factor()
-        assert negation_factor == NegationFactor(Constant(True, SourcePosition(1, 4)), False)
 
     def test_function_call(self):
         pass  # TODO Add function call
