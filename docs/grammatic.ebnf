@@ -15,10 +15,11 @@ functionDeclaration = type, ID, "(", parms, ")", "{", statement, "}";
 parms = {type, ID};
 
 (* STATEMENTS *)
-statement = compoundStatement
-   | ifStatement
-   | whileStatement
-   | returnStatement
+statement = (compoundStatement
+      | ifStatement
+      | whileStatement
+      | returnStatement
+   ), ";"
 ;
 
 returnStatement = "return", [expression], ";";

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional
 
 from interpreter.models.constants import Types, RelationshipOperator, SumOperator, MulOperator
 from interpreter.models.base import Currency, Constant, FunctionCall
@@ -8,13 +8,13 @@ from interpreter.models.base import Currency, Constant, FunctionCall
 @dataclass
 class NegationFactor:
     factor: Union['Expression', FunctionCall, Constant]
-    negation: bool = False
+    is_negated: bool = False
 
 
 @dataclass
 class TypeCastingFactor:
     negation_factor: NegationFactor
-    castType: Union[Types, Currency]
+    castType: Optional[Union[Types, Currency]] = None
 
 
 @dataclass

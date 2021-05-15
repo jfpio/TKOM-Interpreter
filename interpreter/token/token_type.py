@@ -27,6 +27,7 @@ class TokenType(Enum):
     FLOAT = auto()
     STRING = auto()
     BOOL = auto()
+    VOID = auto()
     CURRENCY = auto()
 
     # VALUES

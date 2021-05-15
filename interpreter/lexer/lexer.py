@@ -37,6 +37,7 @@ class Lexer:
         'int': TokenType.INT,
         'float': TokenType.FLOAT,
         'string': TokenType.STRING,
+        'void': TokenType.VOID,
         'bool': TokenType.BOOL,
         'currency': TokenType.CURRENCY,
         'true': TokenType.BOOL_VALUE,
@@ -108,7 +109,10 @@ class Lexer:
             return None
         elif buffer in self.keywords_dict:
             if buffer in ['true', 'false']:
-                return Token(TokenType.BOOL_VALUE, buffer, self._previous_position)
+                if buffer == 'true':
+                    return Token(TokenType.BOOL_VALUE, True, self._previous_position)
+                else:
+                    return Token(TokenType.BOOL_VALUE, False, self._previous_position)
             return Token(self.keywords_dict[buffer], '', self._previous_position)
         else:
             return Token(TokenType.ID, buffer, self._previous_position)
