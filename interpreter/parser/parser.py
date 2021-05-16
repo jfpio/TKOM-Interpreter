@@ -4,7 +4,7 @@ from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import token_type_into_relationship_operand, token_type_into_sum_operator, \
     token_type_into_mul_operator, Types, token_type_into_types, CurrencyType
 from interpreter.models.declarations import Declaration, CurrencyDeclaration
-from interpreter.models.base import FunctionCall, Constant, Variable
+from interpreter.models.base import FunctionCall, Constant, Variable, Factor
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
 from interpreter.parser.parser_error import ParserError
@@ -150,7 +150,7 @@ class Parser:
                 self.next_token()
         return FunctionCall(id, expressions, self.token.source_position)
 
-    def parse_factor(self) -> Union[Expression, FunctionCall, Variable, Constant]:
+    def parse_factor(self) -> Factor:
         """
         factor =
            "(", expression, ")"
