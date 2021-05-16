@@ -42,5 +42,5 @@ class AndExpression:
 
 
 @dataclass
-class Expression(Factor):
+class Expression:
     and_expression: List[AndExpression]

@@ -14,17 +14,17 @@ class TestParserConstructions:
     def test_parse_negation_factor_1(self):
         parser = self._get_parser('!false')
         negation_factor = parser.parse_negation_factor()
-        assert negation_factor == NegationFactor(Constant(False, SourcePosition(1, 6)), True)
+        assert negation_factor == NegationFactor(Constant(SourcePosition(1, 6), False), True)
 
     def test_parse_negation_factor_2(self):
         parser = self._get_parser('true')
         negation_factor = parser.parse_negation_factor()
-        assert negation_factor == NegationFactor(Constant(True, SourcePosition(1, 4)), False)
+        assert negation_factor == NegationFactor(Constant(SourcePosition(1, 4), True), False)
 
     def test_parse_type_casting_factor_1(self):
         parser = self._get_parser('true')
         factor = parser.parse_type_casting_factor()
-        assert factor == TypeCastingFactor(NegationFactor(Constant(True, SourcePosition(1, 4)), False))
+        assert factor == TypeCastingFactor(NegationFactor(Constant(SourcePosition(1, 4), True), False))
 
     def test_parse_type_casting_factor_2(self):
         types = ["int", "float", "string", "bool", "void"]
@@ -36,7 +36,7 @@ class TestParserConstructions:
             assert factor == \
                    TypeCastingFactor(
                        NegationFactor(
-                           Constant(True, SourcePosition(1, len(string))), False), type_enum)
+                           Constant(SourcePosition(1, len(string)), True), False), type_enum)
 
     def test_parse_type_casting_factor_3(self):
         string = '(EUR) true'
@@ -45,13 +45,13 @@ class TestParserConstructions:
         assert factor == \
                TypeCastingFactor(
                    NegationFactor(
-                       Constant(True, SourcePosition(1, len(string))), False), CurrencyType('EUR'))
+                       Constant(SourcePosition(1, len(string)), True), False), CurrencyType('EUR'))
 
     def test_multiply_expression(self):
         def type_casting_factor_factory(value, source_column):
             return TypeCastingFactor(
                 NegationFactor(
-                    Constant(value, SourcePosition(1, source_column)), False))
+                    Constant(SourcePosition(1, source_column), value), False))
 
         string = '4 * 4 / 5 % 3'
         parser = self._get_parser(string)
@@ -70,7 +70,7 @@ class TestParserConstructions:
             return MultiplyExpression(
                 TypeCastingFactor(
                     NegationFactor(
-                        Constant(value, SourcePosition(1, source_column)), False)))
+                        Constant(SourcePosition(1, source_column), value), False)))
 
         string = '4 + 3 - 3'
         parser = self._get_parser(string)
@@ -90,7 +90,7 @@ class TestParserConstructions:
                 MultiplyExpression(
                     TypeCastingFactor(
                         NegationFactor(
-                            Constant(value, SourcePosition(1, source_column)), False))))
+                            Constant(SourcePosition(1, source_column), value), False))))
 
         string = f'1 {relationship_operand_string} 2'
         parser = self._get_parser(string)
@@ -116,7 +116,7 @@ class TestParserConstructions:
                     MultiplyExpression(
                         TypeCastingFactor(
                             NegationFactor(
-                                Constant(value, SourcePosition(1, source_column)), False)))))
+                                Constant(SourcePosition(1, source_column), value), False)))))
 
         string = 'true && false'
         parser = self._get_parser(string)
@@ -138,7 +138,7 @@ class TestParserConstructions:
                             MultiplyExpression(
                                 TypeCastingFactor(
                                     NegationFactor(
-                                        Constant(value, SourcePosition(1, source_column)), False)))))
+                                        Constant(SourcePosition(1, source_column), value), False)))))
                 ])
 
         string = 'true || false'

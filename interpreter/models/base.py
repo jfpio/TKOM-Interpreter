@@ -1,13 +1,8 @@
-from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List
 
 from interpreter.models.constants import Types, CurrencyType
 from interpreter.source.source_position import SourcePosition
-
-
-class Factor(ABC):
-    pass
 
 
 @dataclass
@@ -17,22 +12,22 @@ class Currency:
 
 
 @dataclass
-class Constant(Factor):
+class Constant:
+    source_position: SourcePosition
     value: Union[str, int, float, bool, CurrencyType]
-    source_position: SourcePosition
 
 
 @dataclass
-class Variable(Factor):
+class Variable:
+    source_position: SourcePosition
     id: str
-    source_position: SourcePosition
 
 
 @dataclass
-class FunctionCall(Factor):
+class FunctionCall:
+    source_position: SourcePosition
     id: str
     args: List['Expression']
-    source_position: SourcePosition
 
 
 @dataclass
@@ -43,6 +38,9 @@ class Params:
 
 @dataclass
 class Assignment:
+    source_position: SourcePosition
     id: str
     expression: 'Expression'
-    source_position: SourcePosition
+
+
+Factor = Union[FunctionCall, Variable, 'Expression', Constant]

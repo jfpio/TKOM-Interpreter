@@ -3,11 +3,12 @@ from typing import List, Union
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import token_type_into_relationship_operand, token_type_into_sum_operator, \
     token_type_into_mul_operator, Types, token_type_into_types, CurrencyType
-from interpreter.models.declarations import Declaration, CurrencyDeclaration
-from interpreter.models.base import FunctionCall, Constant, Variable, Factor
+from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration
+from interpreter.models.base import FunctionCall, Constant, Variable, Factor, Assignment
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
-from interpreter.models.statements import ReturnStatement, Statement, CompoundStatement, IfStatement, WhileStatement
+from interpreter.models.statements import ReturnStatement, IfStatement, WhileStatement, \
+    Statements, StatementsTypes
 from interpreter.parser.parser_error import ParserError
 from interpreter.token.token_type import TokenType
 
@@ -29,20 +30,21 @@ class Parser:
         raise ParserError(self.token.source_position, self.token.type, list(args))
 
     def parse_program(self) -> List[Declaration]:
-        statements = []
+        declarations = []
         while self.token.type != TokenType.EOF:
-            statements.append(self.parse_declarations())
-        return statements
+            declarations.append(self.parse_declarations())
+        return declarations
 
     def parse_declarations(self) -> Declaration:
         if self.token.type == TokenType.CURRENCY:
-            return self.parse_currency_declarations()
+            return self.parse_currency_declaration()
         # TODO Add rest of declarations
 
-    def parse_currency_declarations(self) -> CurrencyDeclaration:
+    def parse_currency_declaration(self) -> CurrencyDeclaration:
         """
-        currencyDeclaration = currency_ID, ":=", float | int, ";";
+        currencyDeclaration = currency_ID, ":=", float | int;
         """
+        self.expect(TokenType.CURRENCY)
         currency_name = self.token.value
         self.next_token()
 
@@ -53,39 +55,92 @@ class Parser:
         currency_value = self.token.value
         self.next_token()
 
-        self.expect(TokenType.SEMICOLON)
+        return CurrencyDeclaration(self.previous_token.source_position, currency_name, currency_value)
+
+    def parse_variable_declaration(self) -> VariableDeclaration:
+        """
+        varDeclaration = type, ID, ['=', expression];
+        """
+        type = self.parse_type_name()
+        self.expect(TokenType.ID)
+        id = self.token.value
+        self.next_token()
+        if self.token.type == TokenType.ASSIGN_OPERATOR:
+            expression = self.parse_expression()
+            return VariableDeclaration(self.previous_token.source_position, type, id, expression)
+        return VariableDeclaration(self.previous_token.source_position, type, id, None)
+
+    def parse_assignment_with_id(self, id: str) -> Assignment:
+        self.expect(TokenType.ASSIGN_OPERATOR)
         self.next_token()
 
-        return CurrencyDeclaration(currency_name, currency_value)
+        expression = self.parse_expression()
+        return Assignment(self.previous_token.source_position, id, expression)
 
-    def parse_statement(self) -> Statement:
-        token_type = self.token.type
-        if token_type == TokenType.RETURN_NAME:
-            return self.parse_return_statement()
-        elif token_type == TokenType.WHILE_NAME:
-            return self.parse_while_statement()
-        elif token_type == TokenType.IF_NAME:
-            return self.parse_if_statement()
-        return self.parse_compound_statement()
+    def parse_statements(self) -> Statements:
+        statements: List[StatementsTypes] = []
+        while True:
+            token_type = self.token.type
+            if token_type in token_type_into_types:
+                statements.append(self.parse_variable_declaration())
+            elif token_type == TokenType.CURRENCY:
+                statements.append(self.parse_currency_declaration())
+            elif token_type == TokenType.ID:
+                id = self.token.value
+                self.next_token()
+                if self.token.type == TokenType.ASSIGN_OPERATOR:
+                    statements.append(self.parse_assignment_with_id(id))
+                else:
+                    statements.append(self.parse_function_call(id))
+            elif token_type == TokenType.RETURN_NAME:
+                statements.append(self.parse_return_statement())
+            elif token_type == TokenType.WHILE_NAME:
+                statements.append(self.parse_while_statement())
+            elif token_type == TokenType.IF_NAME:
+                statements.append(self.parse_if_statement())
+            else:
+                break
+            self.expect(TokenType.SEMICOLON)
+            self.next_token()
+
+        return Statements(statements)
 
     def parse_return_statement(self) -> ReturnStatement:
         self.next_token()
         if self.token.type == TokenType.SEMICOLON:
-            self.next_token()
             return ReturnStatement(self.previous_token.source_position, None)
         expression = self.parse_expression()
-        self.expect(TokenType.SEMICOLON)
-        self.next_token()
         return ReturnStatement(self.previous_token.source_position, expression)
 
     def parse_while_statement(self) -> WhileStatement:
-        pass
+        self.next_token()
+        self.expect(TokenType.LEFT_BRACKET)
+        self.next_token()
+
+        expression = self.parse_expression()
+        self.expect(TokenType.RIGHT_BRACKET)
+        self.next_token()
+        self.expect(TokenType.LEFT_CURLY_BRACKET)
+        self.next_token()
+        statements = self.parse_statements()
+        self.expect(TokenType.RIGHT_BRACKET)
+        self.next_token()
+        return WhileStatement(self.previous_token.source_position, expression, statements)
 
     def parse_if_statement(self) -> IfStatement:
-        pass
+        self.next_token()
+        self.expect(TokenType.LEFT_BRACKET)
+        self.next_token()
 
-    def parse_compound_statement(self) -> CompoundStatement:
-        pass
+        expression = self.parse_expression()
+        self.expect(TokenType.RIGHT_BRACKET)
+        self.next_token()
+        self.expect(TokenType.LEFT_CURLY_BRACKET)
+        self.next_token()
+        statements = self.parse_statements()
+        self.expect(TokenType.RIGHT_BRACKET)
+        self.next_token()
+        return IfStatement(self.previous_token.source_position, expression, statements)
 
     def parse_expression(self) -> Expression:
         """
@@ -178,7 +233,7 @@ class Parser:
                 if self.token.type != TokenType.COMMA:
                     break
                 self.next_token()
-        return FunctionCall(id, expressions, self.token.source_position)
+        return FunctionCall(self.token.source_position, id, expressions)
 
     def parse_factor(self) -> Factor:
         """
@@ -202,14 +257,14 @@ class Parser:
                 self.next_token()
                 return self.parse_function_call(id)
             else:
-                variable = Variable(id, self.previous_token.source_position)
+                variable = Variable(self.previous_token.source_position, id)
                 return variable
         elif self.token.type in [TokenType.INT_VALUE,
                                  TokenType.FLOAT_VALUE,
                                  TokenType.STRING_VALUE,
                                  TokenType.BOOL_VALUE,
                                  TokenType.CURRENCY_VALUE]:
-            constant = Constant(self.token.value, self.token.source_position)
+            constant = Constant(self.token.source_position, self.token.value)
             self.next_token()
             return constant
 
@@ -232,8 +287,8 @@ class Parser:
             self.next_token()
             return type
         elif self.token.type == TokenType.CURRENCY:
-            type = CurrencyType(self.token.value)
+            currency = CurrencyType(self.token.value)
             self.next_token()
-            return type
+            return currency
         raise ParserError(self.token.source_position, self.token.type,
                           list(token_type_into_types.keys()) + [TokenType.CURRENCY])

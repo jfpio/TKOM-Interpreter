@@ -9,21 +9,24 @@ currencyDeclaration = currency_ID, ":=", float | int;
 (* VARIABLE *)
 varDeclaration = type, ID, ['=', expression];
 (* FUNCTION *)
-functionDeclaration = type, ID, "(", parms, ")", "{", statement, "}";
+functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
 parms = {type, ID};
 
 (* STATEMENTS *)
-statement = compoundStatement
-   | ifStatement
-   | whileStatement
-   | returnStatement
-;
+statements = {
+      (
+         varDeclaration 
+         | currencyDeclaration 
+         | ID () 
+         | functioncall 
+         | returnStatement
+         | whileStatement 
+         | ifStatement
+      ), ";"};
 
-returnStatement = "return", [expression], ";";
-whileStatement = "while", "(", expression, ")", "{", statement, "}";
-ifStatement = "if", "(", expression, ")", "{", statement, "}";
-compoundStatement = {(varDeclaration | currencyDeclaration | assignment | expression | statement), ";"};
-
+returnStatement = "return", [expression];
+whileStatement = "while", "(", expression, ")", "{", statements, "}";
+ifStatement = "if", "(", expression, ")", "{", statements, "}";
 
 (* Expressions*)
 expression = andExpression, {"or", andExpression};
@@ -34,10 +37,12 @@ multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
 typeCastingFactor = ["(", type, ")"], negationFactor;
 negationFactor = ["!"], factor;
 
-assignment = (ID, "=", expression);
+(*Assigment and expression have same beginning: ID *)
+restOfAssignment = "=", expression;
+restOfFunctionCall = "(", args, ")";
 factor = 
    "(", expression, ")"
-   | (ID, [("(", args, ")"]) (*variable or function call*) 
+   | (ID, [restOfFunctionCall]) (*variable or function call*) 
    | constant
 ;
 

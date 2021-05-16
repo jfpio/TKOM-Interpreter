@@ -5,10 +5,13 @@ from typing import Union, List, Optional
 from interpreter.models.base import Params
 from interpreter.models.constants import Types
 from interpreter.models.statements import Statement
+from interpreter.source.source_position import SourcePosition
 
 
+@dataclass
 class Declaration(ABC):
-    pass
+    source_position: SourcePosition
+
 
 @dataclass
 class FunctionDeclaration(Declaration):

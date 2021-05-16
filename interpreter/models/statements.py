@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, List, Union
 
-from interpreter.models.base import Assignment
+from interpreter.models.base import Assignment, FunctionCall
 from interpreter.models.expressions import Expression
 from interpreter.source.source_position import SourcePosition
 
@@ -20,15 +20,19 @@ class ReturnStatement(Statement):
 @dataclass
 class WhileStatement(Statement):
     expression: 'Expression'
-    statement: Statement
+    statement: 'Statements'
 
 
 @dataclass
 class IfStatement(Statement):
     expression: 'Expression'
-    statement: Statement
+    statement: 'Statements'
+
+
+StatementsTypes = Union['VariableDeclaration', 'CurrencyDeclaration', Assignment, FunctionCall, ReturnStatement,
+                        WhileStatement, IfStatement]
 
 
 @dataclass
-class CompoundStatement(Statement):
-    statements: List[Union['VariableDeclaration', Assignment, Statement]]
+class Statements:
+    list_of_statements: List[StatementsTypes]
