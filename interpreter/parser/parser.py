@@ -36,6 +36,7 @@ class Parser:
     def parse_declarations(self) -> Declaration:
         if self.token.type == TokenType.CURRENCY:
             return self.parse_currency_declarations()
+        # TODO Add rest of declarations
 
     def parse_currency_declarations(self) -> CurrencyDeclaration:
         """

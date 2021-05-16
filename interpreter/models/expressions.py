@@ -2,12 +2,12 @@ from dataclasses import dataclass, field
 from typing import List, Union, Tuple, Optional
 
 from interpreter.models.constants import Types, RelationshipOperator, SumOperator, MulOperator, CurrencyType
-from interpreter.models.base import Constant, FunctionCall
+from interpreter.models.base import Constant, FunctionCall, Variable
 
 
 @dataclass
 class NegationFactor:
-    factor: Union['Expression', FunctionCall, Constant]
+    factor: Union['Expression', FunctionCall, Constant, Variable]
     is_negated: bool = False
 
 
