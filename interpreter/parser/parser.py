@@ -7,6 +7,7 @@ from interpreter.models.declarations import Declaration, CurrencyDeclaration
 from interpreter.models.base import FunctionCall, Constant, Variable, Factor
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
+from interpreter.models.statements import ReturnStatement, Statement, CompoundStatement, IfStatement, WhileStatement
 from interpreter.parser.parser_error import ParserError
 from interpreter.token.token_type import TokenType
 
@@ -56,6 +57,35 @@ class Parser:
         self.next_token()
 
         return CurrencyDeclaration(currency_name, currency_value)
+
+    def parse_statement(self) -> Statement:
+        token_type = self.token.type
+        if token_type == TokenType.RETURN_NAME:
+            return self.parse_return_statement()
+        elif token_type == TokenType.WHILE_NAME:
+            return self.parse_while_statement()
+        elif token_type == TokenType.IF_NAME:
+            return self.parse_if_statement()
+        return self.parse_compound_statement()
+
+    def parse_return_statement(self) -> ReturnStatement:
+        self.next_token()
+        if self.token.type == TokenType.SEMICOLON:
+            self.next_token()
+            return ReturnStatement(self.previous_token.source_position, None)
+        expression = self.parse_expression()
+        self.expect(TokenType.SEMICOLON)
+        self.next_token()
+        return ReturnStatement(self.previous_token.source_position, expression)
+
+    def parse_while_statement(self) -> WhileStatement:
+        pass
+
+    def parse_if_statement(self) -> IfStatement:
+        pass
+
+    def parse_compound_statement(self) -> CompoundStatement:
+        pass
 
     def parse_expression(self) -> Expression:
         """

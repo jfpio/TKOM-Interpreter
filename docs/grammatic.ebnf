@@ -1,13 +1,11 @@
 program = declaration, {declaration};
 
 (*function declaration and varDeclaration have same beggining, but I think that this is more clear*)
-declaration = varDeclaration 
-   | functionDeclaration
-   | currencyDeclaration
+declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration
 ;
 
 (* CURRENCY *)
-currencyDeclaration = currency_ID, ":=", float | int, ";";
+currencyDeclaration = currency_ID, ":=", float | int;
 (* VARIABLE *)
 varDeclaration = type, ID, ['=', expression];
 (* FUNCTION *)
@@ -15,17 +13,16 @@ functionDeclaration = type, ID, "(", parms, ")", "{", statement, "}";
 parms = {type, ID};
 
 (* STATEMENTS *)
-statement = (compoundStatement
+statement = compoundStatement
    | ifStatement
    | whileStatement
    | returnStatement
-   ), ";"
 ;
 
 returnStatement = "return", [expression], ";";
-whileStatement = "while", "(", expression, ")", "{", statement "}";
-ifStatement = "if", "(" expression, ")", "{", statement "}";
-compoundStatement = {varDeclaration | assignment | statement};
+whileStatement = "while", "(", expression, ")", "{", statement, "}";
+ifStatement = "if", "(", expression, ")", "{", statement, "}";
+compoundStatement = {(varDeclaration | currencyDeclaration | assignment | expression | statement), ";"};
 
 
 (* Expressions*)

@@ -3,10 +3,13 @@ from dataclasses import dataclass
 from typing import Optional, List, Union
 
 from interpreter.models.base import Assignment
+from interpreter.models.expressions import Expression
+from interpreter.source.source_position import SourcePosition
 
 
+@dataclass
 class Statement(ABC):
-    pass
+    source_position: SourcePosition
 
 
 @dataclass
