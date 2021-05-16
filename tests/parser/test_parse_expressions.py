@@ -148,7 +148,6 @@ class TestParserConstructions:
             [
                 and_expression_factory(True, 4),
                 and_expression_factory(False, len(string)),
-
             ]
         )
 

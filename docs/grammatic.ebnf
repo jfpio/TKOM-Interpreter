@@ -17,8 +17,7 @@ statements = {
       (
          varDeclaration 
          | currencyDeclaration 
-         | ID () 
-         | functioncall 
+         | ID, (restOfAssignment | restOfFunctionCall) 
          | returnStatement
          | whileStatement 
          | ifStatement

@@ -66,6 +66,7 @@ class Parser:
         id = self.token.value
         self.next_token()
         if self.token.type == TokenType.ASSIGN_OPERATOR:
+            self.next_token()
             expression = self.parse_expression()
             return VariableDeclaration(self.previous_token.source_position, type, id, expression)
         return VariableDeclaration(self.previous_token.source_position, type, id, None)
@@ -123,7 +124,7 @@ class Parser:
         self.expect(TokenType.LEFT_CURLY_BRACKET)
         self.next_token()
         statements = self.parse_statements()
-        self.expect(TokenType.RIGHT_BRACKET)
+        self.expect(TokenType.RIGHT_CURLY_BRACKET)
         self.next_token()
         return WhileStatement(self.previous_token.source_position, expression, statements)
 
@@ -138,7 +139,7 @@ class Parser:
         self.expect(TokenType.LEFT_CURLY_BRACKET)
         self.next_token()
         statements = self.parse_statements()
-        self.expect(TokenType.RIGHT_BRACKET)
+        self.expect(TokenType.RIGHT_CURLY_BRACKET)
         self.next_token()
         return IfStatement(self.previous_token.source_position, expression, statements)
 
@@ -227,13 +228,17 @@ class Parser:
         (ID, [("(", args, ")"]) (*variable or function call*)
         """
         expressions = []
+
+        self.next_token()
         while self.token.type != TokenType.RIGHT_BRACKET:
             while expression := self.parse_expression():
                 expressions.append(expression)
                 if self.token.type != TokenType.COMMA:
                     break
                 self.next_token()
-        return FunctionCall(self.token.source_position, id, expressions)
+
+        self.next_token()
+        return FunctionCall(self.previous_token.source_position, id, expressions)
 
     def parse_factor(self) -> Factor:
         """
@@ -254,7 +259,6 @@ class Parser:
             id = self.token.value
             self.next_token()
             if self.token.type == TokenType.LEFT_BRACKET:
-                self.next_token()
                 return self.parse_function_call(id)
             else:
                 variable = Variable(self.previous_token.source_position, id)
