@@ -2,9 +2,9 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List, Optional
 
-from interpreter.models.base import Params
+from interpreter.models.base import Param
 from interpreter.models.constants import Types
-from interpreter.models.statements import Statement
+from interpreter.models.statements import Statements
 from interpreter.source.source_position import SourcePosition
 
 
@@ -17,8 +17,8 @@ class Declaration(ABC):
 class FunctionDeclaration(Declaration):
     return_type: Types
     id: str
-    params: List[Params]
-    statement: Statement
+    params: List[Param]
+    statement: Statements
 
 
 @dataclass

@@ -1,8 +1,7 @@
 program = declaration, {declaration};
 
 (*function declaration and varDeclaration have same beggining, but I think that this is more clear*)
-declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration
-;
+declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
 
 (* CURRENCY *)
 currencyDeclaration = currency_ID, ":=", float | int;
@@ -10,7 +9,7 @@ currencyDeclaration = currency_ID, ":=", float | int;
 varDeclaration = type, ID, ['=', expression];
 (* FUNCTION *)
 functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
-parms = {type, ID};
+parms = [type, ID, {",", type, ID}];
 
 (* STATEMENTS *)
 statements = {
@@ -46,7 +45,7 @@ factor =
 ;
 
 
-args = {expression, {",", expression}};
+args = [expression, {",", expression}];
 constant = 
    int
    | float

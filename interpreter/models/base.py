@@ -31,7 +31,7 @@ class FunctionCall:
 
 
 @dataclass
-class Params:
+class Param:
     id: str
     type: Types
 
