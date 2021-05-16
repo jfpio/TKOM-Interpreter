@@ -145,9 +145,10 @@ class Parser:
         while self.token.type != TokenType.RIGHT_BRACKET:
             while expression := self.parse_expression():
                 expressions.append(expression)
-                self.expect(TokenType.COMMA)
+                if self.token.type != TokenType.COMMA:
+                    break
                 self.next_token()
-        return FunctionCall(id, expressions)
+        return FunctionCall(id, expressions, self.token.source_position)
 
     def parse_factor(self) -> Union[Expression, FunctionCall, Variable, Constant]:
         """
@@ -172,7 +173,6 @@ class Parser:
                 return self.parse_function_call(id)
             else:
                 variable = Variable(id, self.previous_token.source_position)
-                self.next_token()
                 return variable
         elif self.token.type in [TokenType.INT_VALUE,
                                  TokenType.FLOAT_VALUE,
@@ -207,5 +207,3 @@ class Parser:
             return type
         raise ParserError(self.token.source_position, self.token.type,
                           list(token_type_into_types.keys()) + [TokenType.CURRENCY])
-
-

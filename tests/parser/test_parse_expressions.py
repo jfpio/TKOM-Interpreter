@@ -27,13 +27,16 @@ class TestParserConstructions:
         assert factor == TypeCastingFactor(NegationFactor(Constant(True, SourcePosition(1, 4)), False))
 
     def test_parse_type_casting_factor_2(self):
-        string = '(int) true'
-        parser = self._get_parser(string)
-        factor = parser.parse_type_casting_factor()
-        assert factor == \
-               TypeCastingFactor(
-                   NegationFactor(
-                       Constant(True, SourcePosition(1, len(string))), False), Types.int)
+        types = ["int", "float", "string", "bool", "void"]
+        types_enum = [Types.int, Types.float, Types.string, Types.bool, Types.void]
+        for type, type_enum in zip(types, types_enum):
+            string = f'({type}) true'
+            parser = self._get_parser(string)
+            factor = parser.parse_type_casting_factor()
+            assert factor == \
+                   TypeCastingFactor(
+                       NegationFactor(
+                           Constant(True, SourcePosition(1, len(string))), False), type_enum)
 
     def test_parse_type_casting_factor_3(self):
         string = '(EUR) true'

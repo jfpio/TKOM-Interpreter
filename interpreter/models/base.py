@@ -27,12 +27,14 @@ class Variable:
 class Assignment:
     id: str
     expression: 'Expression'
+    source_position: SourcePosition
 
 
 @dataclass
 class FunctionCall:
     id: str
     args: List['Expression']
+    source_position: SourcePosition
 
 
 @dataclass
