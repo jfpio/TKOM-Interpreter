@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import token_type_into_relationship_operand, token_type_into_sum_operator, \
@@ -10,6 +10,7 @@ from interpreter.models.expressions import Expression, AndExpression, Relationsh
 from interpreter.models.statements import ReturnStatement, IfStatement, WhileStatement, \
     Statements, StatementsTypes
 from interpreter.parser.parser_error import ParserError
+from interpreter.token.token import Token
 from interpreter.token.token_type import TokenType
 
 
@@ -17,17 +18,23 @@ class Parser:
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         self.token = lexer.get_next_token()
-        self.previous_token = self.token
+        self.previous_token = self.token  # TODO remove that
 
     def next_token(self):
         self.previous_token = self.token
         self.token = self.lexer.get_next_token()
 
-    def expect(self, *args: TokenType) -> bool:
+    def expect_token(self, *args: TokenType) -> bool:
         for token_type in args:
             if self.token.type == token_type:
                 return True
         raise ParserError(self.token.source_position, self.token.type, list(args))
+
+    def consume_token(self, *args: TokenType) -> Token:
+        self.expect_token(*args)
+        token = self.token
+        self.next_token()
+        return token
 
     def parse_program(self) -> List[Declaration]:
         """
@@ -42,63 +49,65 @@ class Parser:
         """
         declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
         """
-        if self.token.type == TokenType.CURRENCY:
-            currency_declaration = self.parse_currency_declaration()
-            self.expect(TokenType.SEMICOLON)
-            self.next_token()
-            return currency_declaration
-        elif self.token.type in token_type_into_types:
-            type = token_type_into_types[self.token.type]
-            self.next_token()
-            self.expect(TokenType.ID)
-            id = self.token.value
-            self.next_token()
-            if self.token.type == TokenType.LEFT_BRACKET:
-                return self.parse_function_declaration(type, id)
-            else:
-                variable_declaration = self.parse_variable_declaration(type, id)
-                self.expect(TokenType.SEMICOLON)
-                self.next_token()
-                return variable_declaration
-        raise ParserError(
-            self.token.source_position, self.token.type, [TokenType.CURRENCY] + list(token_type_into_types.keys())
-        )
+        declaration = self.parse_currency_declaration() or self.parse_function_declaration_or_variable_declaration()
+        if type(declaration) is VariableDeclaration or type(declaration) is CurrencyDeclaration:
+            self.consume_token(TokenType.SEMICOLON)
 
-    def parse_currency_declaration(self) -> CurrencyDeclaration:
+        if declaration is None:
+            raise ParserError(
+                self.token.source_position, self.token.type, [TokenType.CURRENCY] + list(token_type_into_types.keys())
+            )
+        return declaration
+
+    def parse_currency_declaration(self) -> Optional[CurrencyDeclaration]:
         """
         currencyDeclaration = currency_ID, ":=", float | int;
         """
-        self.expect(TokenType.CURRENCY)
-        currency_name = self.token.value
+        if self.token.type != TokenType.CURRENCY:
+            return None
+        currency_token = self.consume_token(TokenType.CURRENCY)
+        currency_name = currency_token.value
+
+        self.consume_token(TokenType.CURRENCY_DECLARATION_OPERATOR)
+        value_token = self.consume_token(TokenType.INT_VALUE, TokenType.FLOAT_VALUE)
+        currency_value = value_token.value
+        currency_declaration = CurrencyDeclaration(value_token.source_position, currency_name, currency_value)
+        return currency_declaration
+
+    def parse_function_declaration_or_variable_declaration(self) \
+            -> Optional[Union[FunctionDeclaration, VariableDeclaration]]:
+        """
+        functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
+        varDeclaration = type, ID, ['=', expression];
+        """
+
+        if self.token.type not in token_type_into_types:
+            return None
+        type = token_type_into_types[self.token.type]
         self.next_token()
 
-        self.expect(TokenType.CURRENCY_DECLARATION_OPERATOR)
-        self.next_token()
+        id_token = self.consume_token(TokenType.ID)
+        id = id_token.value
 
-        self.expect(TokenType.INT_VALUE, TokenType.FLOAT_VALUE)
-        currency_value = self.token.value
-        self.next_token()
+        declaration = self.parse_rest_of_function_declaration(type, id) \
+                      or self.parse_rest_of_variable_declaration(type, id)
+        return declaration
 
-        return CurrencyDeclaration(self.previous_token.source_position, currency_name, currency_value)
-
-    def parse_function_declaration(self, type: Types, id: str) -> FunctionDeclaration:
+    def parse_rest_of_function_declaration(self, type: Types, id: str) -> Optional[FunctionDeclaration]:
         """
         functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
         """
-        self.expect(TokenType.LEFT_BRACKET)
-        self.next_token()
+        if self.token.type != TokenType.LEFT_BRACKET:
+            return None
+        self.consume_token(TokenType.LEFT_BRACKET)
         params = self.parse_params()
-        self.expect(TokenType.RIGHT_BRACKET)
-        self.next_token()
-        self.expect(TokenType.LEFT_CURLY_BRACKET)
-        self.next_token()
+        self.consume_token(TokenType.RIGHT_BRACKET)
+        self.consume_token(TokenType.LEFT_CURLY_BRACKET)
         statements = self.parse_statements()
-        self.expect(TokenType.RIGHT_CURLY_BRACKET)
-        self.next_token()
-
+        self.consume_token(TokenType.RIGHT_CURLY_BRACKET)
         return FunctionDeclaration(self.previous_token.source_position, type, id, params, statements)
 
-    def parse_variable_declaration(self, type: Types, id: str) -> VariableDeclaration:
+    def parse_rest_of_variable_declaration(self, type: Types, id: str) -> VariableDeclaration:
         """
         varDeclaration = type, ID, ['=', expression];
         """
@@ -112,7 +121,7 @@ class Parser:
         """
         restOfAssignment = "=", expression;
         """
-        self.expect(TokenType.ASSIGN_OPERATOR)
+        self.expect_token(TokenType.ASSIGN_OPERATOR)
         self.next_token()
 
         expression = self.parse_expression()
@@ -136,10 +145,10 @@ class Parser:
             if token_type in token_type_into_types:
                 type = token_type_into_types[token_type]
                 self.next_token()
-                self.expect(TokenType.ID)
+                self.expect_token(TokenType.ID)
                 id = self.token.value
                 self.next_token()
-                statements.append(self.parse_variable_declaration(type, id))
+                statements.append(self.parse_rest_of_variable_declaration(type, id))
             elif token_type == TokenType.CURRENCY:
                 statements.append(self.parse_currency_declaration())
             elif token_type == TokenType.ID:
@@ -157,7 +166,7 @@ class Parser:
                 statements.append(self.parse_if_statement())
             else:
                 break
-            self.expect(TokenType.SEMICOLON)
+            self.expect_token(TokenType.SEMICOLON)
             self.next_token()
 
         return Statements(statements)
@@ -177,16 +186,16 @@ class Parser:
         whileStatement = "while", "(", expression, ")", "{", statements, "}";
         """
         self.next_token()
-        self.expect(TokenType.LEFT_BRACKET)
+        self.expect_token(TokenType.LEFT_BRACKET)
         self.next_token()
 
         expression = self.parse_expression()
-        self.expect(TokenType.RIGHT_BRACKET)
+        self.expect_token(TokenType.RIGHT_BRACKET)
         self.next_token()
-        self.expect(TokenType.LEFT_CURLY_BRACKET)
+        self.expect_token(TokenType.LEFT_CURLY_BRACKET)
         self.next_token()
         statements = self.parse_statements()
-        self.expect(TokenType.RIGHT_CURLY_BRACKET)
+        self.expect_token(TokenType.RIGHT_CURLY_BRACKET)
         self.next_token()
         return WhileStatement(self.previous_token.source_position, expression, statements)
 
@@ -195,16 +204,16 @@ class Parser:
         ifStatement = "if", "(", expression, ")", "{", statements, "}";
         """
         self.next_token()
-        self.expect(TokenType.LEFT_BRACKET)
+        self.expect_token(TokenType.LEFT_BRACKET)
         self.next_token()
 
         expression = self.parse_expression()
-        self.expect(TokenType.RIGHT_BRACKET)
+        self.expect_token(TokenType.RIGHT_BRACKET)
         self.next_token()
-        self.expect(TokenType.LEFT_CURLY_BRACKET)
+        self.expect_token(TokenType.LEFT_CURLY_BRACKET)
         self.next_token()
         statements = self.parse_statements()
-        self.expect(TokenType.RIGHT_CURLY_BRACKET)
+        self.expect_token(TokenType.RIGHT_CURLY_BRACKET)
         self.next_token()
         return IfStatement(self.previous_token.source_position, expression, statements)
 
@@ -273,7 +282,7 @@ class Parser:
         if self.token.type == TokenType.LEFT_BRACKET:
             self.next_token()
             type = self.parse_type_name()
-            self.expect(TokenType.RIGHT_BRACKET)
+            self.expect_token(TokenType.RIGHT_BRACKET)
             self.next_token()
             return TypeCastingFactor(self.parse_negation_factor(), type)
         return TypeCastingFactor(self.parse_negation_factor())
@@ -318,7 +327,7 @@ class Parser:
         if self.token.type == TokenType.LEFT_BRACKET:
             self.next_token()
             expression = self.parse_expression()
-            self.expect(TokenType.RIGHT_BRACKET)
+            self.expect_token(TokenType.RIGHT_BRACKET)
             self.next_token()
             return expression
 
@@ -354,7 +363,7 @@ class Parser:
             return []
 
         type = self.parse_type_name()
-        self.expect(TokenType.ID)
+        self.expect_token(TokenType.ID)
         id = self.token.value
         params.append(Param(id, type))
         self.next_token()
@@ -363,7 +372,7 @@ class Parser:
         while token_type == TokenType.COMMA:
             self.next_token()
             type = self.parse_type_name()
-            self.expect(TokenType.ID)
+            self.expect_token(TokenType.ID)
             id = self.token.value
             params.append(Param(id, type))
             self.next_token()
