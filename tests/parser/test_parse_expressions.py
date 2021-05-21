@@ -8,6 +8,8 @@ from interpreter.models.expressions import NegationFactor, TypeCastingFactor, Mu
 from interpreter.parser.parser import Parser
 from interpreter.source.source import Source
 from interpreter.source.source_position import SourcePosition
+from tests.parser.utils import mul_expression_factory, and_expression_factory, \
+    relationship_expression_factory, type_casting_factor_factory, sum_expression_factory
 
 
 class TestParserConstructions:
@@ -48,11 +50,6 @@ class TestParserConstructions:
                        Constant(SourcePosition(1, len(string)), True), False), CurrencyType('EUR'))
 
     def test_multiply_expression(self):
-        def type_casting_factor_factory(value, source_column):
-            return TypeCastingFactor(
-                NegationFactor(
-                    Constant(SourcePosition(1, source_column), value), False))
-
         string = '4 * 4 / 5 % 3'
         parser = self._get_parser(string)
         expression = parser.parse_multiply_expression()
@@ -66,12 +63,6 @@ class TestParserConstructions:
         )
 
     def test_sum_expression(self):
-        def mul_expression_factory(value, source_column):
-            return MultiplyExpression(
-                TypeCastingFactor(
-                    NegationFactor(
-                        Constant(SourcePosition(1, source_column), value), False)))
-
         string = '4 + 3 - 3'
         parser = self._get_parser(string)
         expression = parser.parse_sum_expression()
@@ -83,15 +74,22 @@ class TestParserConstructions:
             ]
         )
 
+    def test_sum_and_mul_expression(self):
+        string = '4 * 3 - 3'
+        parser = self._get_parser(string)
+        expression = parser.parse_sum_expression()
+        assert expression == SumExpression(
+            MultiplyExpression(
+                type_casting_factor_factory(4, 1),
+                [(MulOperator.MUL, type_casting_factor_factory(3, 5))]
+            ),
+            [
+                (SumOperator.SUB, mul_expression_factory(3, 9)),
+            ]
+        )
+
     def relationship_expression_test_factory(self, relationship_operand_string: str,
                                              relationship_operand_type: RelationshipOperator):
-        def sum_expression_factory(value, source_column):
-            return SumExpression(
-                MultiplyExpression(
-                    TypeCastingFactor(
-                        NegationFactor(
-                            Constant(SourcePosition(1, source_column), value), False))))
-
         string = f'1 {relationship_operand_string} 2'
         parser = self._get_parser(string)
         expression = parser.parse_relationship_expression()
@@ -110,14 +108,6 @@ class TestParserConstructions:
         self.relationship_expression_test_factory('>=', RelationshipOperator.GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR)
 
     def test_and_expression(self):
-        def relationship_expression_factory(value, source_column):
-            return RelationshipExpression(
-                SumExpression(
-                    MultiplyExpression(
-                        TypeCastingFactor(
-                            NegationFactor(
-                                Constant(SourcePosition(1, source_column), value), False)))))
-
         string = 'true && false'
         parser = self._get_parser(string)
         expression = parser.parse_and_expression()
@@ -130,17 +120,6 @@ class TestParserConstructions:
         )
 
     def test_or_expression(self):
-        def and_expression_factory(value, source_column):
-            return AndExpression(
-                [
-                    RelationshipExpression(
-                        SumExpression(
-                            MultiplyExpression(
-                                TypeCastingFactor(
-                                    NegationFactor(
-                                        Constant(SourcePosition(1, source_column), value), False)))))
-                ])
-
         string = 'true || false'
         parser = self._get_parser(string)
         expression = parser.parse_expression()
