@@ -117,13 +117,13 @@ class Parser:
             return VariableDeclaration(self.previous_token.source_position, type, id, expression)
         return VariableDeclaration(self.previous_token.source_position, type, id, None)
 
-    def parse_assignment_with_id(self, id: str) -> Assignment:
+    def parse_assignment_with_id(self, id: str) -> Optional[Assignment]:
         """
         restOfAssignment = "=", expression;
         """
-        self.expect_token(TokenType.ASSIGN_OPERATOR)
-        self.next_token()
-
+        if self.token.type != TokenType.ASSIGN_OPERATOR:
+            return None
+        self.consume_token(TokenType.ASSIGN_OPERATOR)
         expression = self.parse_expression()
         return Assignment(self.previous_token.source_position, id, expression)
 
@@ -145,19 +145,14 @@ class Parser:
             if token_type in token_type_into_types:
                 type = token_type_into_types[token_type]
                 self.next_token()
-                self.expect_token(TokenType.ID)
-                id = self.token.value
-                self.next_token()
-                statements.append(self.parse_rest_of_variable_declaration(type, id))
+                id_token = self.consume_token(TokenType.ID)
+                statements.append(self.parse_rest_of_variable_declaration(type, id_token.value))
             elif token_type == TokenType.CURRENCY:
                 statements.append(self.parse_currency_declaration())
             elif token_type == TokenType.ID:
                 id = self.token.value
                 self.next_token()
-                if self.token.type == TokenType.ASSIGN_OPERATOR:
-                    statements.append(self.parse_assignment_with_id(id))
-                else:
-                    statements.append(self.parse_function_call(id))
+                statements.append(self.parse_assignment_with_id(id) or self.parse_function_call(id))
             elif token_type == TokenType.RETURN_NAME:
                 statements.append(self.parse_return_statement())
             elif token_type == TokenType.WHILE_NAME:
@@ -166,16 +161,14 @@ class Parser:
                 statements.append(self.parse_if_statement())
             else:
                 break
-            self.expect_token(TokenType.SEMICOLON)
-            self.next_token()
-
+            self.consume_token(TokenType.SEMICOLON)
         return Statements(statements)
 
     def parse_return_statement(self) -> ReturnStatement:
         """
         returnStatement = "return", [expression];
         """
-        self.next_token()
+        self.consume_token(TokenType.RETURN_NAME)
         if self.token.type == TokenType.SEMICOLON:
             return ReturnStatement(self.previous_token.source_position, None)
         expression = self.parse_expression()
@@ -185,36 +178,34 @@ class Parser:
         """
         whileStatement = "while", "(", expression, ")", "{", statements, "}";
         """
-        self.next_token()
-        self.expect_token(TokenType.LEFT_BRACKET)
-        self.next_token()
+        self.consume_token(TokenType.WHILE_NAME)
+        self.consume_token(TokenType.LEFT_BRACKET)
 
         expression = self.parse_expression()
-        self.expect_token(TokenType.RIGHT_BRACKET)
-        self.next_token()
-        self.expect_token(TokenType.LEFT_CURLY_BRACKET)
-        self.next_token()
+
+        self.consume_token(TokenType.RIGHT_BRACKET)
+        self.consume_token(TokenType.LEFT_CURLY_BRACKET)
+
         statements = self.parse_statements()
-        self.expect_token(TokenType.RIGHT_CURLY_BRACKET)
-        self.next_token()
+
+        self.consume_token(TokenType.RIGHT_CURLY_BRACKET)
         return WhileStatement(self.previous_token.source_position, expression, statements)
 
     def parse_if_statement(self) -> IfStatement:
         """
         ifStatement = "if", "(", expression, ")", "{", statements, "}";
         """
-        self.next_token()
-        self.expect_token(TokenType.LEFT_BRACKET)
-        self.next_token()
+        self.consume_token(TokenType.IF_NAME)
+        self.consume_token(TokenType.LEFT_BRACKET)
 
         expression = self.parse_expression()
-        self.expect_token(TokenType.RIGHT_BRACKET)
-        self.next_token()
-        self.expect_token(TokenType.LEFT_CURLY_BRACKET)
-        self.next_token()
+
+        self.consume_token(TokenType.RIGHT_BRACKET)
+        self.consume_token(TokenType.LEFT_CURLY_BRACKET)
+
         statements = self.parse_statements()
-        self.expect_token(TokenType.RIGHT_CURLY_BRACKET)
-        self.next_token()
+
+        self.consume_token(TokenType.RIGHT_CURLY_BRACKET)
         return IfStatement(self.previous_token.source_position, expression, statements)
 
     def parse_expression(self) -> Expression:
@@ -282,8 +273,7 @@ class Parser:
         if self.token.type == TokenType.LEFT_BRACKET:
             self.next_token()
             type = self.parse_type_name()
-            self.expect_token(TokenType.RIGHT_BRACKET)
-            self.next_token()
+            self.consume_token(TokenType.RIGHT_BRACKET)
             return TypeCastingFactor(self.parse_negation_factor(), type)
         return TypeCastingFactor(self.parse_negation_factor())
 
@@ -297,15 +287,18 @@ class Parser:
             return NegationFactor(self.parse_factor(), True)
         return NegationFactor(self.parse_factor(), False)
 
-    def parse_function_call(self, id: str) -> FunctionCall:
+    def parse_function_call(self, id: str) -> Optional[FunctionCall]:
         """
         (ID, [restOfFunctionCall]) (*variable or function call*)
         restOfFunctionCall = "(", args, ")";
         args = [expression, {",", expression}];
         """
+        if self.token.type != TokenType.LEFT_BRACKET:
+            return None
+
         expressions = []
 
-        self.next_token()
+        self.consume_token(TokenType.LEFT_BRACKET)
         while self.token.type != TokenType.RIGHT_BRACKET:
             while expression := self.parse_expression():
                 expressions.append(expression)
@@ -327,8 +320,7 @@ class Parser:
         if self.token.type == TokenType.LEFT_BRACKET:
             self.next_token()
             expression = self.parse_expression()
-            self.expect_token(TokenType.RIGHT_BRACKET)
-            self.next_token()
+            self.consume_token(TokenType.RIGHT_BRACKET)
             return expression
 
         elif self.token.type == TokenType.ID:
@@ -363,20 +355,17 @@ class Parser:
             return []
 
         type = self.parse_type_name()
-        self.expect_token(TokenType.ID)
-        id = self.token.value
+        id_token = self.consume_token(TokenType.ID)
+        id = id_token.value
         params.append(Param(id, type))
-        self.next_token()
-        token_type = self.token.type
 
-        while token_type == TokenType.COMMA:
+        while self.token.type == TokenType.COMMA:
             self.next_token()
             type = self.parse_type_name()
             self.expect_token(TokenType.ID)
             id = self.token.value
             params.append(Param(id, type))
             self.next_token()
-            token_type = self.token.type
         return params
 
     def parse_type_name(self) -> Union[Types, CurrencyType]:
