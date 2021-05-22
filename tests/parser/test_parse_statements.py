@@ -4,8 +4,6 @@ import pytest
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Variable, Assignment, Constant, FunctionCall
-from interpreter.models.constants import Types
-from interpreter.models.declarations import VariableDeclaration, CurrencyDeclaration
 from interpreter.models.statements import ReturnStatement, IfStatement, Statements, WhileStatement
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
@@ -83,17 +81,6 @@ class TestParserConstructions:
         with pytest.raises(ParserError):
             parser = self._get_parser(string)
             parser.parse_while_statement()
-
-    def test_parse_variable_and_currency_declaration_statements(self):
-        string = 'int a = 3; EUR := 3;'
-        parser = self._get_parser(string)
-        statement = parser.parse_statements()
-        assert statement == Statements([
-            VariableDeclaration(
-                SourcePosition(1, 9), Types.int, 'a', simple_expression_factory(Constant(SourcePosition(1, 9), 3))
-            ),
-            CurrencyDeclaration(SourcePosition(1, 19), 'EUR', 3)
-        ])
 
     def test_parse_assignment_and_function_call_statements(self):
         string = 'a=3; a();'

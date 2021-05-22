@@ -12,13 +12,14 @@ class Types(Enum):
     void = 'void'
 
 
-token_type_into_types = {
+TOKEN_TYPES_INTO_TYPES = {
     TokenType.INT: Types.int,
     TokenType.FLOAT: Types.float,
     TokenType.STRING: Types.string,
     TokenType.BOOL: Types.bool,
     TokenType.VOID: Types.void
 }
+POSSIBLE_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 @dataclass
@@ -35,7 +36,7 @@ class RelationshipOperator(Enum):
     GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR = '>='
 
 
-token_type_into_relationship_operand = {
+TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND = {
     TokenType.EQUAL_OPERATOR: RelationshipOperator.EQUAL_OPERATOR,
     TokenType.NOT_EQUAL_OPERATOR: RelationshipOperator.NOT_EQUAL_OPERATOR,
     TokenType.LESS_THAN_OPERATOR: RelationshipOperator.LESS_THAN_OPERATOR,

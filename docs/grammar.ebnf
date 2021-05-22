@@ -13,14 +13,17 @@ parms = [type, ID, {",", type, ID}];
 
 (* STATEMENTS *)
 statements = {
-      (
+      ((
          varDeclaration 
          | currencyDeclaration 
          | ID, (restOfAssignment | restOfFunctionCall) 
          | returnStatement
-         | whileStatement 
-         | ifStatement
-      ), ";"};
+      ), ";")
+      | (
+        whileStatement
+        | ifStatement
+      )
+      };
 
 returnStatement = "return", [expression];
 whileStatement = "while", "(", expression, ")", "{", statements, "}";

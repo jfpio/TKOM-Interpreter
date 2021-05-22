@@ -32,7 +32,7 @@ class TestParserConstructions:
         types = ["int", "float", "string", "bool", "void"]
         types_enum = [Types.int, Types.float, Types.string, Types.bool, Types.void]
         for type, type_enum in zip(types, types_enum):
-            string = f'({type}) true'
+            string = f'{type} true'
             parser = self._get_parser(string)
             factor = parser.parse_type_casting_factor()
             assert factor == \
@@ -41,7 +41,7 @@ class TestParserConstructions:
                            Constant(SourcePosition(1, len(string)), True), False), type_enum)
 
     def test_parse_type_casting_factor_3(self):
-        string = '(EUR) true'
+        string = 'EUR true'
         parser = self._get_parser(string)
         factor = parser.parse_type_casting_factor()
         assert factor == \
