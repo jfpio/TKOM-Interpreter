@@ -38,7 +38,7 @@ class TestSingleTokens:
 
     def test_float_no_fraction_part(self):
         # float = int, '.' , DIGIT, {DIGIT};
-        with pytest.raises(LexerError,  match=r"No digit after dot in float"):
+        with pytest.raises(LexerError, match=r"No digit after dot in float"):
             self._get_first_token('4.')
 
     def test_string(self):
@@ -50,13 +50,13 @@ class TestSingleTokens:
     def test_true_value(self):
         token = self._get_first_token('true')
         assert token.type == TokenType.BOOL_VALUE
-        assert token.value == 'true'
+        assert token.value is True
         assert token.source_position == SourcePosition(1, 4)
 
     def test_false_value(self):
         token = self._get_first_token('false')
         assert token.type == TokenType.BOOL_VALUE
-        assert token.value == 'false'
+        assert token.value is False
         assert token.source_position == SourcePosition(1, 5)
 
     def test_get_extreme_big_string(self):
@@ -188,6 +188,11 @@ class TestSingleTokens:
         assert token.type == TokenType.FLOAT
         assert token.source_position == SourcePosition(1, 6)
 
+    def test_void_keyword(self):
+        token = self._get_first_token(' void ')
+        assert token.type == TokenType.VOID
+        assert token.source_position == SourcePosition(1, 5)
+
     def test_string_keyword(self):
         token = self._get_first_token(' string ')
         assert token.type == TokenType.STRING
@@ -247,7 +252,6 @@ class TestSingleTokens:
         token = self._get_first_token('return')
         assert token.type == TokenType.RETURN_NAME
         assert token.source_position == SourcePosition(1, 6)
-
 
     @staticmethod
     def _get_first_token(string: str) -> Token:

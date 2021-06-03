@@ -1,0 +1,112 @@
+program = declaration, {declaration};
+
+(*function declaration and varDeclaration have same beggining, but I think that this is more clear*)
+declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
+
+(* CURRENCY *)
+currencyDeclaration = currency_ID, ":=", float | int;
+(* VARIABLE *)
+varDeclaration = type, ID, ['=', expression];
+(* FUNCTION *)
+functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
+parms = [type, ID, {",", type, ID}];
+
+(* STATEMENTS *)
+statements = {
+      ((
+         varDeclaration 
+         | currencyDeclaration 
+         | ID, (restOfAssignment | restOfFunctionCall) 
+         | returnStatement
+      ), ";")
+      | (
+        whileStatement
+        | ifStatement
+      )
+      };
+
+returnStatement = "return", [expression];
+whileStatement = "while", "(", expression, ")", "{", statements, "}";
+ifStatement = "if", "(", expression, ")", "{", statements, "}";
+
+(* Expressions*)
+expression = andExpression, {"or", andExpression};
+andExpression = relationshipExpression, {"and", relationshipExpression};
+relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
+sumExpression = multiplyExpression, {sumOperand, multiplyExpression};
+multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
+typeCastingFactor = ["(", type, ")"], negationFactor;
+negationFactor = ["!"], factor;
+
+(*Assigment and expression have same beginning: ID *)
+restOfAssignment = "=", expression;
+restOfFunctionCall = "(", args, ")";
+factor = 
+   "(", expression, ")"
+   | (ID, [restOfFunctionCall]) (*variable or function call*) 
+   | constant
+;
+
+
+args = [expression, {",", expression}];
+constant = 
+   int
+   | float
+   | string
+   | bool
+   | currency
+;
+
+relationshipOperand =
+   "<="
+   | "<"
+   | ">",
+   | ">=",
+   | "==",
+   | "!="
+;
+
+sumOperand = 
+   "+"
+   | "-"
+;
+
+multiplyOperand =
+   "*"
+   | "/"
+   | "%"
+;
+
+type = 
+   "int"
+   | "float"
+   | "string"
+   | "bool"
+   | "void"
+   | currency_ID
+;
+
+int = [-], "0" | "1-9",{DIGIT};
+float = int, '.' , DIGIT, {DIGIT};
+currency = (int | float), currency_ID;
+
+string = "'", {CHAR} "'";
+
+ID = SMALL_LETTER, {"_" | SMALL_LETTER};
+currency_ID = CAPITAL_LETTER, CAPITAL_LETTER, CAPITAL_LETTER; 
+
+CHAR = 
+   DIGIT
+   | LETTER
+   | SYMBOL
+;
+
+LETTER =
+   SMALL_LETTER
+   | CAPITAL_LETTER
+;
+
+SMALL_LETTER = "a-z";
+CAPITAL_LETTER = "A-Z";
+SYMBOL = "[" | "]" | "{" | "}" | "(" | ")" | "<" | ">" | "'" | '"' | "=" | "|" | "." | "," | ";" "_";
+DIGIT = "0-9";
