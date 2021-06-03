@@ -1,5 +1,9 @@
-def hello_world():
-    print("Hello world")
+from interpreter.parser.parser import Parser
 
 
-hello_world()
+class Interpreter:
+    def __init__(self, parser: Parser):
+        self.parser = parser
+
+    def run_code(self) -> str:
+        return '0'
