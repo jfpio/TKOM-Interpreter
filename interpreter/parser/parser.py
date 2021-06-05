@@ -1,9 +1,10 @@
 from typing import List, Union, Optional
 
 from interpreter.lexer.lexer import Lexer
-from interpreter.models.constants import TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND, token_type_into_sum_operator, \
+from interpreter.models.constants import TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND, TOKEN_TYPE_INTO_SUM_OPERATOR, \
     token_type_into_mul_operator, Types, TOKEN_TYPES_INTO_TYPES, CurrencyType, POSSIBLE_TYPES
-from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, FunctionDeclaration
+from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, FunctionDeclaration, \
+    ParseTree
 from interpreter.models.base import FunctionCall, Constant, Variable, Factor, Assignment, Param
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
@@ -19,6 +20,15 @@ class Parser:
         self.lexer = lexer
         self.token = lexer.get_next_token()
         self.previous_token = self.token  # TODO remove that
+
+    def parse_program(self) -> ParseTree:
+        """
+        program = declaration, {declaration};
+        """
+        declarations = [self.parse_declaration()]
+        while self.token.type != TokenType.EOF:
+            declarations.append(self.parse_declaration())
+        return ParseTree(declarations)
 
     def next_token(self):
         self.previous_token = self.token
@@ -41,15 +51,6 @@ class Parser:
         self.next_token()
         return token
 
-    def parse_program(self) -> List[Declaration]:
-        """
-        program = declaration, {declaration};
-        """
-        declarations = [self.parse_declaration()]
-        while self.token.type != TokenType.EOF:
-            declarations.append(self.parse_declaration())
-        return declarations
-
     def parse_declaration(self) -> Declaration:
         """
         declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
@@ -69,14 +70,14 @@ class Parser:
 
     def parse_rest_of_currency_declaration(self, currency: CurrencyType) -> Optional[CurrencyDeclaration]:
         """
-        currencyDeclaration = currency_ID, ":=", float | int;
+        currencyDeclaration = currency_ID, ":=", float;
         """
         if self.token.type != TokenType.CURRENCY_DECLARATION_OPERATOR:
             return None
         self.consume_token(TokenType.CURRENCY_DECLARATION_OPERATOR)
 
         currency_name = currency.name
-        value_token = self.consume_token(TokenType.INT_VALUE, TokenType.FLOAT_VALUE)
+        value_token = self.consume_token(TokenType.FLOAT_VALUE)
         currency_value = value_token.value
         currency_declaration = CurrencyDeclaration(value_token.source_position, currency_name, currency_value)
         return currency_declaration
@@ -272,7 +273,7 @@ class Parser:
 
     def parse_sum_expression(self) -> Optional[SumExpression]:
         """
-        sumExpression = multiplyExpression, {sumOperand, multiplyExpression};
+        sumExpression = left_side, {sumOperand, left_side};
         """
         left_side = self.parse_multiply_expression()
         if left_side is None:
@@ -280,7 +281,7 @@ class Parser:
 
         right_side = []
         while self.token.type in [TokenType.ADD_OPERATOR, TokenType.SUB_OPERATOR]:
-            add_operator = token_type_into_sum_operator[self.token.type]
+            add_operator = TOKEN_TYPE_INTO_SUM_OPERATOR[self.token.type]
             self.next_token()
             expression = self.parse_multiply_expression()
             right_side.append((add_operator, expression))
@@ -288,7 +289,7 @@ class Parser:
 
     def parse_multiply_expression(self) -> Optional[MultiplyExpression]:
         """
-        multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
+        left_side = typeCastingFactor, {multiplyOperand, typeCastingFactor};
         """
         left_side = self.parse_type_casting_factor()
         if left_side is None:

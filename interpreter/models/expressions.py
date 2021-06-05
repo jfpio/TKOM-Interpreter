@@ -10,23 +10,34 @@ class NegationFactor:
     factor: Factor
     is_negated: bool = False
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_negation_factor(self)
 
 @dataclass
 class TypeCastingFactor:
     negation_factor: NegationFactor
     castType: Optional[Union[Types, CurrencyType]] = None
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_type_casting_factor(self)
+
 
 @dataclass
 class MultiplyExpression:
-    type_casting_factor: TypeCastingFactor
+    left_side: TypeCastingFactor
     right_side: List[Tuple[MulOperator, TypeCastingFactor]] = field(default_factory=lambda: [])
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_arithmetic_expression(self)
 
 
 @dataclass
 class SumExpression:
-    multiplyExpression: MultiplyExpression
+    left_side: MultiplyExpression
     right_side: List[Tuple[SumOperator, MultiplyExpression]] = field(default_factory=lambda: [])
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_arithmetic_expression(self)
 
 
 @dataclass
@@ -35,12 +46,21 @@ class RelationshipExpression:
     operator: Optional[RelationshipOperator] = None
     right_side: Optional[SumExpression] = None
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_relationship_expression(self)
+
 
 @dataclass
 class AndExpression:
     relationship_expressions: List[RelationshipExpression]
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_and_expression(self)
+
 
 @dataclass
 class Expression:
-    and_expression: List[AndExpression]
+    and_expressions: List[AndExpression]
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_expression(self)

@@ -18,7 +18,10 @@ class FunctionDeclaration(Declaration):
     return_type: Types
     id: str
     params: List[Param]
-    statement: Statements
+    statements: Statements
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_function_call(self)
 
 
 @dataclass
@@ -27,8 +30,19 @@ class VariableDeclaration(Declaration):
     id: str
     expression: Optional['Expression']
 
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        return visitor.visit_variable_declaration(self, global_declaration)
+
 
 @dataclass
 class CurrencyDeclaration(Declaration):
     name: str
-    value: Union[int, float]
+    value: Union[float]
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_currency_declaration(self)
+
+
+@dataclass
+class ParseTree:
+    declarations: List[Declaration]

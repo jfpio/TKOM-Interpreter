@@ -16,6 +16,8 @@ class Constant:
     source_position: SourcePosition
     value: Union[str, int, float, bool, CurrencyType]
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_factor(self)
 
 @dataclass
 class Variable:

@@ -4,7 +4,7 @@ program = declaration, {declaration};
 declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
 
 (* CURRENCY *)
-currencyDeclaration = currency_ID, ":=", float | int;
+currencyDeclaration = currency_ID, ":=", float;
 (* VARIABLE *)
 varDeclaration = type, ID, ['=', expression];
 (* FUNCTION *)
@@ -15,8 +15,7 @@ parms = [type, ID, {",", type, ID}];
 statements = {
       ((
          varDeclaration 
-         | currencyDeclaration 
-         | ID, (restOfAssignment | restOfFunctionCall) 
+         | ID, (restOfAssignment | restOfFunctionCall)
          | returnStatement
       ), ";")
       | (
@@ -88,7 +87,7 @@ type =
 
 int = [-], "0" | "1-9",{DIGIT};
 float = int, '.' , DIGIT, {DIGIT};
-currency = (int | float), currency_ID;
+currency = (float), currency_ID;
 
 string = "'", {CHAR} "'";
 

@@ -10,6 +10,7 @@ class Types(Enum):
     string = 'string'
     bool = 'bool'
     void = 'void'
+    currency = 'currency'
 
 
 TOKEN_TYPES_INTO_TYPES = {
@@ -45,13 +46,22 @@ TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND = {
     TokenType.GREATER_THAN_OPERATOR_OR_EQUAL: RelationshipOperator.GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR
 }
 
+RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION = {
+    RelationshipOperator.EQUAL_OPERATOR: lambda x, y: x == y,
+    RelationshipOperator.NOT_EQUAL_OPERATOR: lambda x, y: x != y,
+    RelationshipOperator.LESS_THAN_OPERATOR: lambda x, y: x < y,
+    RelationshipOperator.GREATER_THAN_OPERATOR: lambda x, y: x > y,
+    RelationshipOperator.LESS_THAN_OR_EQUAL_OPERATOR: lambda x, y: x <= y,
+    RelationshipOperator.GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR: lambda x, y: x >= y
+}
+
 
 class SumOperator(Enum):
     ADD = '+'
     SUB = '-'
 
 
-token_type_into_sum_operator = {
+TOKEN_TYPE_INTO_SUM_OPERATOR = {
     TokenType.ADD_OPERATOR: SumOperator.ADD,
     TokenType.SUB_OPERATOR: SumOperator.SUB
 }
@@ -67,4 +77,12 @@ token_type_into_mul_operator = {
     TokenType.MUL_OPERATOR: MulOperator.MUL,
     TokenType.DIV_OPERATOR: MulOperator.DIV,
     TokenType.MODULO_OPERATOR: MulOperator.MODULO
+}
+
+ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION = {
+    SumOperator.ADD: lambda x, y: x + y,
+    SumOperator.SUB: lambda x, y: x - y,
+    MulOperator.MUL: lambda x, y: x * y,
+    MulOperator.DIV: lambda x, y: x / y,
+    MulOperator.MODULO: lambda x, y: x % y
 }

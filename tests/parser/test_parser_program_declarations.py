@@ -74,8 +74,8 @@ class TestParserDeclarations:
         source = Source(io.StringIO(string))
         lexer = Lexer(source)
         parser = Parser(lexer)
-
-        return parser.parse_program()
+        parse_tree = parser.parse_program()
+        return parse_tree.declarations
 
     @staticmethod
     def _get_parser(string: str) -> Parser:
