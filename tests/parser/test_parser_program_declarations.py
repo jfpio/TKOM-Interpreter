@@ -45,9 +45,8 @@ class TestParserDeclarations:
 
     def test_variable_declaration_2(self):
         string = 'int a;'
-        declarations = self._get_program_declarations(string)
-        declaration = declarations[0]
-        assert declaration == VariableDeclaration(SourcePosition(1, 5), int, 'a', None)
+        with pytest.raises(ParserError):
+            self._get_program_declarations(string)
 
     def test_function_declaration_1(self):
         string = 'int a(int b, int c){return b;}'

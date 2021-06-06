@@ -16,6 +16,7 @@ class SemanticErrorCode(Enum):
 class RuntimeErrorCode(Enum):
     INFINITE_LOOP = 'Infinite loop found'
     INFINITE_RECURSION = 'Infinite recursion'
+    VAR_NOT_INITIALIZED_WITH_VALUE = 'Variable not initialized with value'
 
 
 class EnvironmentException(Exception):

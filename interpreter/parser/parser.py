@@ -122,13 +122,11 @@ class Parser:
 
     def parse_rest_of_variable_declaration(self, type: CustomTypeOfTypes, id: str) -> VariableDeclaration:
         """
-        varDeclaration = type, ID, ['=', expression];
+        varDeclaration = type, ID, '=', expression;
         """
-        if self.token.type == TokenType.ASSIGN_OPERATOR:
-            self.next_token()
-            expression = self.parse_expression()
-            return VariableDeclaration(self.previous_token.source_position, type, id, expression)
-        return VariableDeclaration(self.previous_token.source_position, type, id, None)
+        self.consume_token(TokenType.ASSIGN_OPERATOR)
+        expression = self.parse_expression()
+        return VariableDeclaration(self.previous_token.source_position, type, id, expression)
 
     def parse_assignment_with_id(self, id: str) -> Optional[Assignment]:
         """
@@ -145,7 +143,6 @@ class Parser:
         statements = {
               ((
                  varDeclaration
-                 | currencyDeclaration
                  | ID, (restOfAssignment | restOfFunctionCall)
                  | returnStatement
               ), ";")

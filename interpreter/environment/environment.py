@@ -2,7 +2,7 @@ from functools import reduce
 from typing import Union, Optional, Dict, List
 
 from interpreter.environment.frame import Frame
-from interpreter.models.base import Constant, Variable, FunctionCall
+from interpreter.models.base import Constant, Variable, FunctionCall, Assignment
 from interpreter.models.constants import RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
     ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION, PossibleTypes, CustomTypeOfTypes, CurrencyType, CurrencyValue
 from interpreter.models.declarations import ParseTree, VariableDeclaration, CurrencyDeclaration, FunctionDeclaration
@@ -41,7 +41,10 @@ class Environment:
             scope = self.current_frame.local_variables
         if declaration.id in scope:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
-        scope[declaration.id] = declaration.expression.accept(self)
+
+        value = declaration.expression.accept(self)
+        self.check_type(declaration.type, value, declaration.source_position)
+        scope[declaration.id] = value
 
     def visit_currency_declaration(self, declaration: CurrencyDeclaration):
         if declaration.name in self.currency_declarations:
@@ -58,7 +61,11 @@ class Environment:
         return constant.value
 
     def visit_variable(self, variable: Variable):
-        return self.get_variable(variable.id, variable.source_position)
+        value = self.get_variable(variable.id, variable.source_position)
+        if value is None:
+            raise RunTimeEnvError(variable.source_position, RuntimeErrorCode.VAR_NOT_INITIALIZED_WITH_VALUE,
+                                  variable.id)
+        return value
 
     def visit_function_call(self, function_call: FunctionCall):
         function_declaration = self.get_function_declaration(function_call.id, function_call.source_position)
@@ -77,6 +84,14 @@ class Environment:
             if return_value is not None:
                 return return_value
         return None
+
+    def visit_assignment(self, assignment: Assignment):
+        var_id = assignment.id
+        var = self.get_variable(var_id, assignment.source_position)
+        value = assignment.expression.accept(self)
+
+        self.check_type(type(var), value, assignment.source_position)
+        self.current_frame.local_variables[var_id] = value
 
     def visit_if_statement(self, if_statement: IfStatement):
         condition = if_statement.expression.accept(self)
@@ -197,7 +212,7 @@ class Environment:
             return self.functions_declarations[name]
         raise SemanticError(source_position, SemanticErrorCode.FUN_ID_NOT_FOUND, name)
 
-    def get_variable(self, name: str, source_position: SourcePosition):
+    def get_variable(self, name: str, source_position: SourcePosition) -> PossibleTypes:
         if name in self.current_frame.local_variables:
             return self.current_frame.local_variables[name]
         elif name in self.global_variables:

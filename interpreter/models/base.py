@@ -47,5 +47,8 @@ class Assignment(ParseTreeNode):
     id: str
     expression: 'Expression'
 
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_assignment(self)
+
 
 Factor = Union[FunctionCall, Variable, 'Expression', Constant]

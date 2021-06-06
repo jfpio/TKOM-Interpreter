@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from interpreter.models.base import Param, ParseTreeNode
 from interpreter.models.constants import CustomTypeOfTypes
@@ -27,9 +27,9 @@ class FunctionDeclaration(Declaration):
 class VariableDeclaration(Declaration):
     type: CustomTypeOfTypes
     id: str
-    expression: Optional['Expression']
+    expression: 'Expression'
 
-    def accept(self, visitor: 'Environment', global_declaration: bool):
+    def accept(self, visitor: 'Environment', global_declaration: bool = False):
         return visitor.visit_variable_declaration(self, global_declaration)
 
 

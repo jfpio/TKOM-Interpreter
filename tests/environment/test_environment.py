@@ -186,6 +186,36 @@ class TestEnvironment:
         with pytest.raises(SemanticTypeError):
             self.get_result_of_main(string)
 
+    def test_assignment_1(self):
+        string = """
+        int main(){
+        int a = 3;
+        return a;
+        }
+        """
+        result = self.get_result_of_main(string)
+        assert result == 3
+
+    def test_assignment_2(self):
+        string = """
+        int main(){
+        int a = 3;
+        return a;
+        }
+        """
+        result = self.get_result_of_main(string)
+        assert result == 3
+
+    def test_assignment_3(self):
+        string = """
+        int main(){
+        int a = 3.0;
+        return a;
+        }
+        """
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
     @staticmethod
     def get_result_of_main(string) -> PossibleTypes:
         source = Source(io.StringIO(string))

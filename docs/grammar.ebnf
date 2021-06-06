@@ -6,7 +6,7 @@ declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration
 (* CURRENCY *)
 currencyDeclaration = currency_ID, ":=", float;
 (* VARIABLE *)
-varDeclaration = type, ID, ['=', expression];
+varDeclaration = type, ID, '=', expression;
 (* FUNCTION *)
 functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
 parms = [type, ID, {",", type, ID}];

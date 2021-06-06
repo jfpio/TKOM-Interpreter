@@ -39,7 +39,7 @@ class IfStatement(Statement):
         return visitor.visit_if_statement(self)
 
 
-StatementsTypes = Union['VariableDeclaration', 'CurrencyDeclaration', Assignment, FunctionCall, ReturnStatement,
+StatementsTypes = Union['VariableDeclaration', Assignment, FunctionCall, ReturnStatement,
                         WhileStatement, IfStatement]
 
 
