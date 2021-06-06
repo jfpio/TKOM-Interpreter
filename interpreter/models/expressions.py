@@ -2,19 +2,20 @@ from dataclasses import dataclass, field
 from typing import List, Union, Tuple, Optional
 
 from interpreter.models.constants import Types, RelationshipOperator, SumOperator, MulOperator, CurrencyType
-from interpreter.models.base import Factor
+from interpreter.models.base import Factor, ParseTreeNode
 
 
 @dataclass
-class NegationFactor:
+class NegationFactor(ParseTreeNode):
     factor: Factor
     is_negated: bool = False
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_negation_factor(self)
 
+
 @dataclass
-class TypeCastingFactor:
+class TypeCastingFactor(ParseTreeNode):
     negation_factor: NegationFactor
     castType: Optional[Union[Types, CurrencyType]] = None
 
@@ -23,7 +24,7 @@ class TypeCastingFactor:
 
 
 @dataclass
-class MultiplyExpression:
+class MultiplyExpression(ParseTreeNode):
     left_side: TypeCastingFactor
     right_side: List[Tuple[MulOperator, TypeCastingFactor]] = field(default_factory=lambda: [])
 
@@ -32,7 +33,7 @@ class MultiplyExpression:
 
 
 @dataclass
-class SumExpression:
+class SumExpression(ParseTreeNode):
     left_side: MultiplyExpression
     right_side: List[Tuple[SumOperator, MultiplyExpression]] = field(default_factory=lambda: [])
 
@@ -41,7 +42,7 @@ class SumExpression:
 
 
 @dataclass
-class RelationshipExpression:
+class RelationshipExpression(ParseTreeNode):
     left_side: SumExpression
     operator: Optional[RelationshipOperator] = None
     right_side: Optional[SumExpression] = None
@@ -51,7 +52,7 @@ class RelationshipExpression:
 
 
 @dataclass
-class AndExpression:
+class AndExpression(ParseTreeNode):
     relationship_expressions: List[RelationshipExpression]
 
     def accept(self, visitor: 'Environment'):
@@ -59,7 +60,7 @@ class AndExpression:
 
 
 @dataclass
-class Expression:
+class Expression(ParseTreeNode):
     and_expressions: List[AndExpression]
 
     def accept(self, visitor: 'Environment'):

@@ -2,7 +2,6 @@ import io
 
 from interpreter.environment.environment import Environment
 from interpreter.lexer.lexer import Lexer
-from interpreter.main import Interpreter
 from interpreter.parser.parser import Parser
 from interpreter.source.source import Source
 

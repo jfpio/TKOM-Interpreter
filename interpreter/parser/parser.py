@@ -240,7 +240,7 @@ class Parser:
         while self.token.type == TokenType.OR_OPERATOR:
             self.next_token()
             and_expressions.append(self.parse_and_expression())
-        return Expression(and_expressions)
+        return Expression(self.previous_token.source_position, and_expressions)
 
     def parse_and_expression(self) -> Optional[AndExpression]:
         """
@@ -254,7 +254,7 @@ class Parser:
         while self.token.type == TokenType.AND_OPERATOR:
             self.next_token()
             relationship_expressions.append(self.parse_relationship_expression())
-        return AndExpression(relationship_expressions)
+        return AndExpression(self.previous_token.source_position, relationship_expressions)
 
     def parse_relationship_expression(self) -> Optional[RelationshipExpression]:
         """
@@ -268,8 +268,8 @@ class Parser:
             operator = TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND[self.token.type]
             self.next_token()
             right_side = self.parse_sum_expression()
-            return RelationshipExpression(left_side, operator, right_side)
-        return RelationshipExpression(left_side)
+            return RelationshipExpression(self.previous_token.source_position, left_side, operator, right_side)
+        return RelationshipExpression(self.previous_token.source_position, left_side)
 
     def parse_sum_expression(self) -> Optional[SumExpression]:
         """
@@ -285,7 +285,7 @@ class Parser:
             self.next_token()
             expression = self.parse_multiply_expression()
             right_side.append((add_operator, expression))
-        return SumExpression(left_side, right_side)
+        return SumExpression(self.previous_token.source_position, left_side, right_side)
 
     def parse_multiply_expression(self) -> Optional[MultiplyExpression]:
         """
@@ -301,7 +301,7 @@ class Parser:
             self.next_token()
             expression = self.parse_type_casting_factor()
             right_side.append((mul_operator, expression))
-        return MultiplyExpression(left_side, right_side)
+        return MultiplyExpression(self.previous_token.source_position, left_side, right_side)
 
     def parse_type_casting_factor(self) -> Optional[TypeCastingFactor]:
         """
@@ -312,10 +312,11 @@ class Parser:
             if negation_factor is None:
                 return None
             else:
-                return TypeCastingFactor(negation_factor)
+                return TypeCastingFactor(self.previous_token.source_position, negation_factor)
 
         type = self.parse_type_name()
-        return TypeCastingFactor(self.parse_negation_factor(), type)
+        negation_factor = self.parse_negation_factor()
+        return TypeCastingFactor(self.previous_token.source_position, negation_factor, type)
 
     def parse_negation_factor(self) -> Optional[NegationFactor]:
         """
@@ -326,9 +327,10 @@ class Parser:
             if factor is None:
                 return None
             else:
-                return NegationFactor(factor, False)
+                return NegationFactor(self.previous_token.source_position, factor, False)
         self.consume_token(TokenType.NEGATION_OPERATOR)
-        return NegationFactor(self.parse_factor(), True)
+        factor = self.parse_factor()
+        return NegationFactor(self.previous_token.source_position, factor, True)
 
     def parse_factor(self) -> Factor:
         """
