@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List
 
-from interpreter.models.constants import Types, CurrencyType
+from interpreter.models.constants import SimpleTypes, CurrencyType
 from interpreter.source.source_position import SourcePosition
 
 
@@ -33,7 +33,7 @@ class FunctionCall(ParseTreeNode):
 @dataclass
 class Param(ParseTreeNode):
     id: str
-    type: Types
+    type: SimpleTypes
 
 
 @dataclass

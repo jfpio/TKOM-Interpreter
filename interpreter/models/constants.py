@@ -1,31 +1,34 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 
 from interpreter.token.token_type import TokenType
 
 
-class Types(Enum):
+class SimpleTypes(Enum):
     int = 'int'
     float = 'float'
     string = 'string'
     bool = 'bool'
-    void = 'void'
     currency = 'currency'
 
 
 TOKEN_TYPES_INTO_TYPES = {
-    TokenType.INT: Types.int,
-    TokenType.FLOAT: Types.float,
-    TokenType.STRING: Types.string,
-    TokenType.BOOL: Types.bool,
-    TokenType.VOID: Types.void
+    TokenType.INT: SimpleTypes.int,
+    TokenType.FLOAT: SimpleTypes.float,
+    TokenType.STRING: SimpleTypes.string,
+    TokenType.BOOL: SimpleTypes.bool,
 }
-POSSIBLE_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
+POSSIBLE_TOKEN_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 @dataclass
 class CurrencyType:
     name: str
+
+
+# TODO Change Simple Types into Types
+Types = Union[SimpleTypes, CurrencyType]
 
 
 class RelationshipOperator(Enum):

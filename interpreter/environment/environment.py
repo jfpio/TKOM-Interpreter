@@ -2,79 +2,81 @@ from builtins import str
 from functools import reduce
 from typing import Dict, Union, Optional
 
+from interpreter.environment.frame import Frame
 from interpreter.models.base import Constant
-from interpreter.models.constants import Types, RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
+from interpreter.models.constants import SimpleTypes, RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
     ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION
 from interpreter.models.declarations import ParseTree, VariableDeclaration, CurrencyDeclaration, FunctionDeclaration
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, MultiplyExpression, \
     SumExpression, TypeCastingFactor, NegationFactor
 from interpreter.environment.semantic_errors import SemanticError, SemanticErrorCode, SemanticTypeError
-from interpreter.environment.symbols import VarSymbol, CurrencySymbol
 from interpreter.environment.types import SimpleTypesIntoEnvironmentTypes, EnvironmentTypesIntoTypes, EnvironmentTypes
-from interpreter.models.statements import ReturnStatement, IfStatement
+from interpreter.models.statements import ReturnStatement, IfStatement, Statements
 from interpreter.source.source_position import SourcePosition
 
 
 class Environment:
     def __init__(self, parse_tree: ParseTree):
-        self.global_variables = Dict[str, VarSymbol]
-        self.currency_declarations = Dict[str, CurrencySymbol]
+        self.global_variables = {}
         self.functions_declarations = {}
-        self.local_variables = Dict[str, VarSymbol]
+        self.currency_declarations = {}
+        self.frames_stack = []
 
         for declaration in parse_tree.declarations:
-            if isinstance(declaration, VariableDeclaration):
-                declaration.accept(self, True)
-            self.functions_declarations[declaration.id] = declaration
+            declaration.accept(self, True)
 
-    def run_main(self):
+        self.current_frame = Frame(
+            self.functions_declarations['main'],
+            SourcePosition(0, 0),
+            []
+        )
+
+    def run_main(self) -> Optional[EnvironmentTypes]:
         main_function = self.functions_declarations['main']
-        return main_function.accept(self)
+        return main_function.statements.accept(self)
 
     def visit_variable_declaration(self, declaration: VariableDeclaration, global_declaration: bool):
         if global_declaration:
             scope = self.global_variables
         else:
-            scope = self.local_variables
+            scope = self.current_frame.local_variables
         if declaration.id in scope:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
-        scope[declaration.id] = VarSymbol(
-            declaration.id,
-            declaration.type,
-            declaration.expression.accept()
-        )
+        scope[declaration.id] = declaration
 
     def visit_currency_declaration(self, declaration: CurrencyDeclaration):
         if declaration.name in self.currency_declarations:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.name)
-        self.currency_declarations[declaration.name] = CurrencySymbol(
-            declaration.name,
-            declaration.value
-        )
+        self.currency_declarations[declaration.name] = declaration
 
-    # def visit_function_declaration(self, declaration: FunctionDeclaration):
-    #     if declaration.id in self.functions_declarations:
-    #         raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
-    #     self.functions_declarations[declaration.id] = declaration
+    def visit_function_declaration(self, declaration: FunctionDeclaration):
+        if declaration.id in self.functions_declarations:
+            raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
+        self.functions_declarations[declaration.id] = declaration
 
     def visit_function_call(self, declaration: FunctionDeclaration):
-        for statement in declaration.statements:
-            if isinstance(statement, ReturnStatement):
-                return statement.accept(self)
-            statement.accept(self)
+        pass
+
+    def visit_statements(self, statements: Statements):
+        for statement in statements.list_of_statements:
+            return_value = None
+            while return_value is None:
+                return_value = statement.accept(self)
+            return return_value
 
     def visit_if_statement(self, if_statement: IfStatement):
         condition = if_statement.expression.accept(self)
-        self.check_type(Types.bool, condition, if_statement.expression.source_position)
+        self.check_type(SimpleTypes.bool, condition, if_statement.expression.source_position)
         if condition:
-            for statement in if_statement.statements:
-                statement.accept(self)
+            return if_statement.statements.accept(self)
 
     def visit_return_statement(self, return_statement: ReturnStatement):
-        # TODO Refactor after add function call
+        return_value = None
         if return_statement.expression:
-            return return_statement.expression.accept(self)
-        return None
+            return_value = return_statement.expression.accept(self)
+
+        self.current_frame.check_return_value(return_value)
+        return return_value
 
     def visit_expression(self, expression: Expression) -> Optional[EnvironmentTypes]:
         if len(expression.and_expressions) == 1:
@@ -84,7 +86,7 @@ class Environment:
         and_expressions = []
         for exp in expression.and_expressions:
             exp_result = exp.accept(self)
-            self.check_type(Types.bool, exp_result, exp.source_position)
+            self.check_type(SimpleTypes.bool, exp_result, exp.source_position)
             and_expressions.append(exp_result)
         return reduce(lambda acc, x: acc or x, and_expressions)
 
@@ -96,7 +98,7 @@ class Environment:
         relationship_expressions = []
         for exp in expression.relationship_expressions:
             exp_result = exp.accept(self)
-            self.check_type(Types.bool, exp_result, exp.source_position)
+            self.check_type(SimpleTypes.bool, exp_result, exp.source_position)
             relationship_expressions.append(exp_result)
         return reduce(lambda acc, x: acc and x, relationship_expressions)
 
@@ -142,7 +144,7 @@ class Environment:
         if negation_factor.is_negated:
             value = negation_factor.factor.accept(self)
             if not isinstance(value, bool):
-                raise SemanticTypeError(negation_factor.source_position, Types.bool, type(value))
+                raise SemanticTypeError(negation_factor.source_position, SimpleTypes.bool, type(value))
             return not value
         return negation_factor.factor.accept(self)
 
@@ -150,7 +152,7 @@ class Environment:
         return constant.value
 
     @staticmethod
-    def check_type(value_type: Types, value, source_position: SourcePosition) -> bool:
+    def check_type(value_type: SimpleTypes, value, source_position: SourcePosition) -> bool:
         if isinstance(value, SimpleTypesIntoEnvironmentTypes[value_type]):
             return True
         else:

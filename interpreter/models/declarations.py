@@ -2,29 +2,30 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from interpreter.models.base import Param, ParseTreeNode
-from interpreter.models.constants import Types
+from interpreter.models.constants import SimpleTypes
 from interpreter.models.statements import Statements
 
 
 @dataclass
 class Declaration(ParseTreeNode):
-    pass
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        pass
 
 
 @dataclass
 class FunctionDeclaration(Declaration):
-    return_type: Types
+    return_type: SimpleTypes
     id: str
     params: List[Param]
     statements: Statements
 
-    def accept(self, visitor: 'Environment'):
-        return visitor.visit_function_call(self)
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        return visitor.visit_function_declaration(self)
 
 
 @dataclass
 class VariableDeclaration(Declaration):
-    type: Types
+    type: SimpleTypes
     id: str
     expression: Optional['Expression']
 
@@ -37,7 +38,7 @@ class CurrencyDeclaration(Declaration):
     name: str
     value: float
 
-    def accept(self, visitor: 'Environment'):
+    def accept(self, visitor: 'Environment', global_declaration: bool):
         return visitor.visit_currency_declaration(self)
 
 

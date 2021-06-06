@@ -37,7 +37,6 @@ class Lexer:
         'int': TokenType.INT,
         'float': TokenType.FLOAT,
         'string': TokenType.STRING,
-        'void': TokenType.VOID,
         'bool': TokenType.BOOL,
         'currency': TokenType.CURRENCY,
         'true': TokenType.BOOL_VALUE,

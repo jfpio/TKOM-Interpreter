@@ -2,7 +2,7 @@ from typing import List, Union, Optional
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND, TOKEN_TYPE_INTO_SUM_OPERATOR, \
-    token_type_into_mul_operator, Types, TOKEN_TYPES_INTO_TYPES, CurrencyType, POSSIBLE_TYPES
+    token_type_into_mul_operator, SimpleTypes, TOKEN_TYPES_INTO_TYPES, CurrencyType, POSSIBLE_TOKEN_TYPES
 from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, \
     FunctionDeclaration, ParseTree
 from interpreter.models.base import FunctionCall, Constant, Variable, Factor, Assignment, Param
@@ -82,7 +82,7 @@ class Parser:
         currency_declaration = CurrencyDeclaration(value_token.source_position, currency_name, currency_value)
         return currency_declaration
 
-    def parse_rest_of_function_declaration_or_variable_declaration(self, type: Types) \
+    def parse_rest_of_function_declaration_or_variable_declaration(self, type: SimpleTypes) \
             -> Optional[Union[FunctionDeclaration, VariableDeclaration]]:
         """
         functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
@@ -98,7 +98,7 @@ class Parser:
                       or self.parse_rest_of_variable_declaration(type, id)
         return declaration
 
-    def parse_rest_of_function_declaration(self, type: Types, id: str) -> Optional[FunctionDeclaration]:
+    def parse_rest_of_function_declaration(self, type: SimpleTypes, id: str) -> Optional[FunctionDeclaration]:
         """
         functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
         """
@@ -119,7 +119,7 @@ class Parser:
         id_token = self.consume_token(TokenType.ID)
         return self.parse_rest_of_variable_declaration(type, id_token.value)
 
-    def parse_rest_of_variable_declaration(self, type: Types, id: str) -> VariableDeclaration:
+    def parse_rest_of_variable_declaration(self, type: SimpleTypes, id: str) -> VariableDeclaration:
         """
         varDeclaration = type, ID, ['=', expression];
         """
@@ -168,7 +168,7 @@ class Parser:
                 self.consume_token(TokenType.SEMICOLON)
             else:
                 break
-        return statements
+        return Statements(statements)
 
     def parse_assignment_or_function_call(self) -> Optional[Union[Assignment, FunctionCall]]:
         if self.token.type != TokenType.ID:
@@ -307,7 +307,7 @@ class Parser:
         """
         typeCastingFactor = [type], negationFactor;
         """
-        if self.token.type not in POSSIBLE_TYPES:
+        if self.token.type not in POSSIBLE_TOKEN_TYPES:
             negation_factor = self.parse_negation_factor()
             if negation_factor is None:
                 return None
@@ -426,13 +426,12 @@ class Parser:
             self.next_token()
         return params
 
-    def parse_type_name(self) -> Optional[Union[Types, CurrencyType]]:
+    def parse_type_name(self) -> Optional[Union[SimpleTypes, CurrencyType]]:
         """
         type = "int"
             | "float"
             | "string"
             | "bool"
-            | "void"
             | currency_ID
         ;
         """

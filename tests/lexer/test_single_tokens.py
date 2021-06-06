@@ -194,11 +194,6 @@ class TestSingleTokens:
         assert token.type == TokenType.FLOAT
         assert token.source_position == SourcePosition(1, 6)
 
-    def test_void_keyword(self):
-        token = self._get_first_token(' void ')
-        assert token.type == TokenType.VOID
-        assert token.source_position == SourcePosition(1, 5)
-
     def test_string_keyword(self):
         token = self._get_first_token(' string ')
         assert token.type == TokenType.STRING

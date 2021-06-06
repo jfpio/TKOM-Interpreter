@@ -39,4 +39,10 @@ class IfStatement(Statement):
 StatementsTypes = Union['VariableDeclaration', 'CurrencyDeclaration', Assignment, FunctionCall, ReturnStatement,
                         WhileStatement, IfStatement]
 
-Statements = List[StatementsTypes]
+
+@dataclass
+class Statements:
+    list_of_statements: List[StatementsTypes]
+
+    def accept(self, visitor: 'Environment'):
+        return visitor.visit_statements(self)

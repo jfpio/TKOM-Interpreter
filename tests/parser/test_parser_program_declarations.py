@@ -4,9 +4,9 @@ import pytest
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Constant, Param, Variable
-from interpreter.models.constants import Types
+from interpreter.models.constants import SimpleTypes
 from interpreter.models.declarations import CurrencyDeclaration, Declaration, VariableDeclaration, FunctionDeclaration
-from interpreter.models.statements import ReturnStatement
+from interpreter.models.statements import ReturnStatement, Statements
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
@@ -41,33 +41,34 @@ class TestParserDeclarations:
         string = 'int a = 4.92;'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
-        assert declaration == VariableDeclaration(SourcePosition(1, 12), Types.int, 'a',
+        assert declaration == VariableDeclaration(SourcePosition(1, 12), SimpleTypes.int, 'a',
                                                   simple_expression_factory(Constant(SourcePosition(1, 12), 4.92)))
 
     def test_variable_declaration_2(self):
         string = 'int a;'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
-        assert declaration == VariableDeclaration(SourcePosition(1, 5), Types.int, 'a', None)
+        assert declaration == VariableDeclaration(SourcePosition(1, 5), SimpleTypes.int, 'a', None)
 
     def test_function_declaration_1(self):
         string = 'int a(int b, int c){return b;}'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
         assert declaration == FunctionDeclaration(
-            SourcePosition(1, len(string)), Types.int, 'a',
-            [Param(SourcePosition(1, 11), 'b', Types.int), Param(SourcePosition(1, 18), 'c', Types.int)],
-            [ReturnStatement(SourcePosition(1, 28),
-                             simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))])
+            SourcePosition(1, len(string)), SimpleTypes.int, 'a',
+            [Param(SourcePosition(1, 11), 'b', SimpleTypes.int), Param(SourcePosition(1, 18), 'c', SimpleTypes.int)],
+            Statements(
+                [ReturnStatement(SourcePosition(1, 28),
+                                 simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))]))
 
     def test_function_declaration_2(self):
         string = 'int a(){}'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
         assert declaration == FunctionDeclaration(
-            SourcePosition(1, len(string)), Types.int, 'a',
+            SourcePosition(1, len(string)), SimpleTypes.int, 'a',
             [],
-            [])
+            Statements([]))
 
     @staticmethod
     def _get_program_declarations(string: str) -> List[Declaration]:

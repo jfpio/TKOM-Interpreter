@@ -24,7 +24,7 @@ statements = {
       )
       };
 
-returnStatement = "return", [expression];
+returnStatement = "return", expression;
 whileStatement = "while", "(", expression, ")", "{", statements, "}";
 ifStatement = "if", "(", expression, ")", "{", statements, "}";
 
@@ -81,7 +81,6 @@ type =
    | "float"
    | "string"
    | "bool"
-   | "void"
    | currency_ID
 ;
 

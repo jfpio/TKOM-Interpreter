@@ -1,16 +1,15 @@
 from dataclasses import dataclass
 from typing import Union
 
-from interpreter.models.constants import Types
+from interpreter.models.constants import SimpleTypes, CurrencyType
 
 
 @dataclass
-class CurrencyValue:
+class CurrencyValue(CurrencyType):
     value: float
-    currency_name: str
 
     def __str__(self):
-        return f"{self.value}{self.currency_name}"
+        return f"{self.value}{self.name}"
 
     def __int__(self):
         return int(self.value)
@@ -28,16 +27,16 @@ class CurrencyValue:
 EnvironmentTypes = Union[int, float, str, bool, CurrencyValue]
 
 SimpleTypesIntoEnvironmentTypes = {
-    Types.int: int,
-    Types.float: float,
-    Types.string: str,
-    Types.bool: bool,
+    SimpleTypes.int: int,
+    SimpleTypes.float: float,
+    SimpleTypes.string: str,
+    SimpleTypes.bool: bool,
 }
 
 EnvironmentTypesIntoTypes = {
-    int: Types.int,
-    float: Types.float,
-    str: Types.string,
-    bool: Types.bool,
-    CurrencyValue: Types.currency
+    int: SimpleTypes.int,
+    float: SimpleTypes.float,
+    str: SimpleTypes.string,
+    bool: SimpleTypes.bool,
+    CurrencyValue: SimpleTypes.currency
 }
