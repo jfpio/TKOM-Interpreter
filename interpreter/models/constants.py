@@ -31,7 +31,7 @@ class CurrencyValue:
             return True
 
 
-CustomTypeTypes = Union[Type, CurrencyType]
+CustomTypeOfTypes = Union[Type, CurrencyType]
 PossibleTypes = Union[int, float, str, bool, CurrencyValue]
 
 TOKEN_TYPES_INTO_TYPES = {

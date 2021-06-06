@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from interpreter.models.base import Param, ParseTreeNode
-from interpreter.models.constants import CustomTypeTypes
+from interpreter.models.constants import CustomTypeOfTypes
 from interpreter.models.statements import Statements
 
 
@@ -14,7 +14,7 @@ class Declaration(ParseTreeNode):
 
 @dataclass
 class FunctionDeclaration(Declaration):
-    return_type: CustomTypeTypes
+    return_type: CustomTypeOfTypes
     id: str
     params: List[Param]
     statements: Statements
@@ -25,7 +25,7 @@ class FunctionDeclaration(Declaration):
 
 @dataclass
 class VariableDeclaration(Declaration):
-    type: CustomTypeTypes
+    type: CustomTypeOfTypes
     id: str
     expression: Optional['Expression']
 

@@ -2,9 +2,9 @@ from functools import reduce
 from typing import Union, Optional, Dict, List
 
 from interpreter.environment.frame import Frame
-from interpreter.models.base import Constant
+from interpreter.models.base import Constant, Variable, FunctionCall
 from interpreter.models.constants import RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
-    ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION, PossibleTypes, CustomTypeTypes, CurrencyType, CurrencyValue
+    ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION, PossibleTypes, CustomTypeOfTypes, CurrencyType, CurrencyValue
 from interpreter.models.declarations import ParseTree, VariableDeclaration, CurrencyDeclaration, FunctionDeclaration
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, MultiplyExpression, \
     SumExpression, TypeCastingFactor, NegationFactor
@@ -16,7 +16,7 @@ from interpreter.source.source_position import SourcePosition
 
 class Environment:
     def __init__(self, parse_tree: ParseTree):
-        self.global_variables: Dict[str, VariableDeclaration] = {}
+        self.global_variables: Dict[str, PossibleTypes] = {}
         self.functions_declarations: Dict[str, FunctionDeclaration] = {}
         self.currency_declarations: Dict[str, CurrencyDeclaration] = {}
         self.frames_stack: List[Frame] = []
@@ -41,7 +41,7 @@ class Environment:
             scope = self.current_frame.local_variables
         if declaration.id in scope:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
-        scope[declaration.id] = declaration
+        scope[declaration.id] = declaration.expression.accept(self)
 
     def visit_currency_declaration(self, declaration: CurrencyDeclaration):
         if declaration.name in self.currency_declarations:
@@ -53,8 +53,23 @@ class Environment:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
         self.functions_declarations[declaration.id] = declaration
 
-    def visit_function_call(self, declaration: FunctionDeclaration):
-        pass
+    @staticmethod
+    def visit_constant(constant: Constant) -> Optional[PossibleTypes]:
+        return constant.value
+
+    def visit_variable(self, variable: Variable):
+        return self.get_variable(variable.id, variable.source_position)
+
+    def visit_function_call(self, function_call: FunctionCall):
+        function_declaration = self.get_function_declaration(function_call.id, function_call.source_position)
+        new_frame = Frame(function_declaration,
+                          function_call.source_position,
+                          [exp.accept(self) for exp in function_call.args])
+        self.frames_stack.append(self.current_frame)
+        if len(self.frames_stack) == 10:
+            raise RunTimeEnvError(function_call.source_position, RuntimeErrorCode.INFINITE_RECURSION, function_call.id)
+        self.current_frame = new_frame
+        return function_declaration.statements.accept(self)
 
     def visit_statements(self, statements: Statements):
         for statement in statements.list_of_statements:
@@ -162,10 +177,7 @@ class Environment:
             return not value
         return negation_factor.factor.accept(self)
 
-    def visit_factor(self, constant: Constant) -> Optional[PossibleTypes]:
-        return constant.value
-
-    def cast(self, casting_type: CustomTypeTypes, value: PossibleTypes, source_position: SourcePosition) \
+    def cast(self, casting_type: CustomTypeOfTypes, value: PossibleTypes, source_position: SourcePosition) \
             -> PossibleTypes:
         if casting_type is CurrencyType:
             if type(value) is float:
@@ -185,7 +197,7 @@ class Environment:
             return self.functions_declarations[name]
         raise SemanticError(source_position, SemanticErrorCode.FUN_ID_NOT_FOUND, name)
 
-    def get_variable_declaration(self, name: str, source_position: SourcePosition):
+    def get_variable(self, name: str, source_position: SourcePosition):
         if name in self.current_frame.local_variables:
             return self.current_frame.local_variables[name]
         elif name in self.global_variables:
@@ -198,7 +210,7 @@ class Environment:
         raise SemanticError(source_position, SemanticErrorCode.CURR_ID_NOT_FOUND, name)
 
     @staticmethod
-    def check_type(value_type: CustomTypeTypes, value, source_position: SourcePosition) -> bool:
+    def check_type(value_type: CustomTypeOfTypes, value, source_position: SourcePosition) -> bool:
         if type(value) == value_type:
             return True
         else:

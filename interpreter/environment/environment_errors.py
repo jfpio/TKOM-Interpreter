@@ -15,6 +15,7 @@ class SemanticErrorCode(Enum):
 
 class RuntimeErrorCode(Enum):
     INFINITE_LOOP = 'Infinite loop found'
+    INFINITE_RECURSION = 'Infinite recursion'
 
 
 class EnvironmentException(Exception):

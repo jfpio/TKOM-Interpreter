@@ -130,6 +130,62 @@ class TestEnvironment:
         with pytest.raises(SemanticTypeError):
             self.get_result_of_main(string)
 
+    def test_global_variable(self):
+        string = """
+        int a = 3;
+        int main(){return a;}
+        """
+        result = self.get_result_of_main(string)
+        assert result == 3
+
+    def test_function_call_1(self):
+        string = """
+        int a(){return 3;}
+        int main(){return a();}
+        """
+        result = self.get_result_of_main(string)
+        assert result == 3
+
+    def test_function_call_2(self):
+        string = """
+        int a(int b){return 3;}
+        int main(){return a(2);}
+        """
+        result = self.get_result_of_main(string)
+        assert result == 3
+
+    def test_function_call_3(self):
+        string = """
+        int a(bool b){return 3;}
+        int main(){return a(2);}
+        """
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_function_call_4(self):
+        string = """
+        bool a(int b){return 3;}
+        int main(){return a(2);}
+        """
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_function_call_5(self):
+        string = """
+        int a(){return a();}
+        int main(){return a();}
+        """
+        with pytest.raises(RunTimeEnvError):
+            self.get_result_of_main(string)
+
+    def test_function_call_6(self):
+        string = """
+        bool a(int b){return 3;}
+        int main(){return a(2);}
+        """
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
     @staticmethod
     def get_result_of_main(string) -> PossibleTypes:
         source = Source(io.StringIO(string))

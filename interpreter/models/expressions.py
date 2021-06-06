@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional
 
-from interpreter.models.constants import RelationshipOperator, SumOperator, MulOperator, CustomTypeTypes
+from interpreter.models.constants import RelationshipOperator, SumOperator, MulOperator, CustomTypeOfTypes
 from interpreter.models.base import Factor, ParseTreeNode
 
 
@@ -17,7 +17,7 @@ class NegationFactor(ParseTreeNode):
 @dataclass
 class TypeCastingFactor(ParseTreeNode):
     negation_factor: NegationFactor
-    cast_type: CustomTypeTypes = None
+    cast_type: CustomTypeOfTypes = None
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_type_casting_factor(self)
