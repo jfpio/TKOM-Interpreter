@@ -42,6 +42,17 @@ class TestParserConstructions:
                                                 Constant(SourcePosition(1, len(string)), True), False),
                                  CurrencyType('EUR'))
 
+    def test_parse_type_casting_factor_3(self):
+        string = 'int true'
+        parser = self._get_parser(string)
+        factor = parser.parse_type_casting_factor()
+        source_position = SourcePosition(1, len(string))
+        assert factor == \
+               TypeCastingFactor(source_position,
+                                 NegationFactor(source_position,
+                                                Constant(SourcePosition(1, len(string)), True), False),
+                                 Types.int)
+
     def test_multiply_expression(self):
         string = '4 * 4 / 5 % 3'
         parser = self._get_parser(string)

@@ -305,7 +305,7 @@ class Parser:
 
     def parse_type_casting_factor(self) -> Optional[TypeCastingFactor]:
         """
-        typeCastingFactor = ["(", type, ")"], negationFactor;
+        typeCastingFactor = [type], negationFactor;
         """
         if self.token.type not in POSSIBLE_TYPES:
             negation_factor = self.parse_negation_factor()

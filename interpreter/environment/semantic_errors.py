@@ -10,7 +10,7 @@ class SemanticErrorCode(Enum):
 
 
 class SemanticError(Exception):
-    def __init__(self, source_position: SourcePosition, error_code: SemanticErrorCode, id: str):
+    def __init__(self, source_position: SourcePosition, error_code: SemanticErrorCode):
         self.error_code = error_code
         self.position = source_position
 

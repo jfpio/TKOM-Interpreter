@@ -17,7 +17,7 @@ class NegationFactor(ParseTreeNode):
 @dataclass
 class TypeCastingFactor(ParseTreeNode):
     negation_factor: NegationFactor
-    castType: Optional[Union[Types, CurrencyType]] = None
+    cast_type: Optional[Union[Types, CurrencyType]] = None
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_type_casting_factor(self)

@@ -10,7 +10,7 @@ from interpreter.models.expressions import Expression, AndExpression, Relationsh
     SumExpression, TypeCastingFactor, NegationFactor
 from interpreter.environment.semantic_errors import SemanticError, SemanticErrorCode, SemanticTypeError
 from interpreter.environment.symbols import VarSymbol, CurrencySymbol, FunctionSymbol
-from interpreter.environment.types import TypesIntoEnvironmentTypes, EnvironmentTypesIntoTypes
+from interpreter.environment.types import SimpleTypesIntoEnvironmentTypes, EnvironmentTypesIntoTypes, EnvironmentTypes
 from interpreter.models.statements import ReturnStatement
 from interpreter.source.source_position import SourcePosition
 
@@ -29,7 +29,7 @@ class Environment:
 
     def run_main(self):
         main_function = self.functions_declarations['main']
-        return str(main_function.accept(self))
+        return main_function.accept(self)
 
     def visit_variable_declaration(self, declaration: VariableDeclaration, global_declaration: bool):
         if global_declaration:
@@ -62,7 +62,7 @@ class Environment:
             if isinstance(i, ReturnStatement):
                 return i.expression.accept(self)
 
-    def visit_expression(self, expression: Expression):
+    def visit_expression(self, expression: Expression) -> EnvironmentTypes:
         if len(expression.and_expressions) == 1:
             and_expression = expression.and_expressions[0]
             return and_expression.accept(self)
@@ -71,7 +71,7 @@ class Environment:
         and_expressions = [exp for exp in and_expressions if self.check_type(Types.bool, exp)]
         return reduce(lambda acc, x: acc or x, and_expressions)
 
-    def visit_and_expression(self, expression: AndExpression):
+    def visit_and_expression(self, expression: AndExpression) -> EnvironmentTypes:
         if len(expression.relationship_expressions) == 1:
             relationship_expression = expression.relationship_expressions[0]
             return relationship_expression.accept(self)
@@ -80,7 +80,7 @@ class Environment:
         and_expressions = [exp for exp in relationship_expressions if self.check_type(Types.bool, exp)]
         return reduce(lambda acc, x: acc and x, and_expressions)
 
-    def visit_relationship_expression(self, expression: RelationshipExpression):
+    def visit_relationship_expression(self, expression: RelationshipExpression) -> EnvironmentTypes:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
@@ -92,7 +92,7 @@ class Environment:
         right_side = expression.right_side.accept(self)
         return relationship_function(left_side, right_side)
 
-    def visit_arithmetic_expression(self, expression: Union[SumExpression, MultiplyExpression]):
+    def visit_arithmetic_expression(self, expression: Union[SumExpression, MultiplyExpression]) -> EnvironmentTypes:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
@@ -106,20 +106,27 @@ class Environment:
             accumulator = evaluate_function(accumulator, multiply_expression.accept(self))
         return accumulator
 
-    def visit_type_casting_factor(self, factor: TypeCastingFactor):
-        # TODO
-        return factor.negation_factor.accept(self)
+    def visit_type_casting_factor(self, factor: TypeCastingFactor) -> EnvironmentTypes:
+        if not factor.cast_type:
+            return factor.negation_factor.accept(self)
+
+        cast_type = SimpleTypesIntoEnvironmentTypes[factor.cast_type]
+        return cast_type(factor.negation_factor.accept(self))
 
     def visit_negation_factor(self, negation_factor: NegationFactor):
-        # TODO
+        if negation_factor.is_negated:
+            value = negation_factor.factor.accept(self)
+            if not isinstance(value, bool):
+                raise SemanticTypeError(negation_factor.source_position, Types.bool, type(value))
+            return not value
         return negation_factor.factor.accept(self)
 
-    def visit_factor(self, constant: Constant):
+    def visit_factor(self, constant: Constant) -> EnvironmentTypes:
         return constant.value
 
     @staticmethod
     def check_type(value_type: Types, value) -> bool:
-        if isinstance(value, TypesIntoEnvironmentTypes[value_type]):
+        if isinstance(value, SimpleTypesIntoEnvironmentTypes[value_type]):
             return True
         else:
             # TODO Fix source position

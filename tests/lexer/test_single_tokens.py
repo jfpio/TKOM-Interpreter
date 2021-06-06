@@ -30,11 +30,17 @@ class TestSingleTokens:
         with pytest.raises(LexerError, match=r"Can't match any token"):
             self._get_first_token('"abc')
 
-    def test_get_float(self):
+    def test_get_float_1(self):
         token = self._get_first_token('111.1')
         assert token.type == TokenType.FLOAT_VALUE
         assert token.value == 111.1
         assert token.source_position == SourcePosition(1, 5)
+
+    def test_get_float_2(self):
+        token = self._get_first_token('0.1')
+        assert token.type == TokenType.FLOAT_VALUE
+        assert token.value == 0.1
+        assert token.source_position == SourcePosition(1, 3)
 
     def test_float_no_fraction_part(self):
         # float = int, '.' , DIGIT, {DIGIT};
