@@ -56,7 +56,7 @@ class TestParserDeclarations:
         declaration = declarations[0]
         assert declaration == FunctionDeclaration(
             SourcePosition(1, len(string)), Types.int, 'a',
-            [Param('b', Types.int), Param('c', Types.int)],
+            [Param(SourcePosition(1, 11), 'b', Types.int), Param(SourcePosition(1, 18), 'c', Types.int)],
             Statements([ReturnStatement(SourcePosition(1, 28),
                                         simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))]))
 

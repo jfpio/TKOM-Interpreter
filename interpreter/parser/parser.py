@@ -3,8 +3,8 @@ from typing import List, Union, Optional
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND, TOKEN_TYPE_INTO_SUM_OPERATOR, \
     token_type_into_mul_operator, Types, TOKEN_TYPES_INTO_TYPES, CurrencyType, POSSIBLE_TYPES
-from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, FunctionDeclaration, \
-    ParseTree
+from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, \
+    FunctionDeclaration, ParseTree
 from interpreter.models.base import FunctionCall, Constant, Variable, Factor, Assignment, Param
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, SumExpression, \
     MultiplyExpression, TypeCastingFactor, NegationFactor
@@ -413,14 +413,14 @@ class Parser:
         type = self.parse_type_name()
         id_token = self.consume_token(TokenType.ID)
         id = id_token.value
-        params.append(Param(id, type))
+        params.append(Param(id_token.source_position, id, type))
 
         while self.token.type == TokenType.COMMA:
             self.next_token()
             type = self.parse_type_name()
             self.expect_token(TokenType.ID)
             id = self.token.value
-            params.append(Param(id, type))
+            params.append(Param(self.token.source_position, id, type))
             self.next_token()
         return params
 

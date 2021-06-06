@@ -1,16 +1,14 @@
-from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List, Optional
 
-from interpreter.models.base import Param
+from interpreter.models.base import Param, ParseTreeNode
 from interpreter.models.constants import Types
 from interpreter.models.statements import Statements
-from interpreter.source.source_position import SourcePosition
 
 
 @dataclass
-class Declaration(ABC):
-    source_position: SourcePosition
+class Declaration(ParseTreeNode):
+    pass
 
 
 @dataclass
@@ -37,7 +35,7 @@ class VariableDeclaration(Declaration):
 @dataclass
 class CurrencyDeclaration(Declaration):
     name: str
-    value: Union[float]
+    value: float
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_currency_declaration(self)

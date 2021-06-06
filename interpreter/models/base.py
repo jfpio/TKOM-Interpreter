@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List
 
@@ -6,41 +7,37 @@ from interpreter.source.source_position import SourcePosition
 
 
 @dataclass
-class Currency:
-    name: str
-    value: Union[int, float]
+class ParseTreeNode(ABC):
+    source_position: SourcePosition
 
 
 @dataclass
-class Constant:
-    source_position: SourcePosition
+class Constant(ParseTreeNode):
     value: Union[str, int, float, bool, CurrencyType]
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_factor(self)
 
+
 @dataclass
-class Variable:
-    source_position: SourcePosition
+class Variable(ParseTreeNode):
     id: str
 
 
 @dataclass
-class FunctionCall:
-    source_position: SourcePosition
+class FunctionCall(ParseTreeNode):
     id: str
     args: List['Expression']
 
 
 @dataclass
-class Param:
+class Param(ParseTreeNode):
     id: str
     type: Types
 
 
 @dataclass
-class Assignment:
-    source_position: SourcePosition
+class Assignment(ParseTreeNode):
     id: str
     expression: 'Expression'
 
