@@ -16,6 +16,46 @@ class TestEnvironment:
         result = self.get_result_of_main(string)
         assert result == 3
 
+    def test_or_expression_1(self):
+        string = 'int main(){return true || true;}'
+        result = self.get_result_of_main(string)
+        assert result == True
+
+    def test_or_expression_2(self):
+        string = 'int main(){return false || false;}'
+        result = self.get_result_of_main(string)
+        assert result == False
+
+    def test_or_expression_3(self):
+        string = 'int main(){return 1 || 1;}'
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_and_expression_1(self):
+        string = 'int main(){return true && true;}'
+        result = self.get_result_of_main(string)
+        assert result == True
+
+    def test_and_expression_2(self):
+        string = 'int main(){return true && false;}'
+        result = self.get_result_of_main(string)
+        assert result == False
+
+    def test_and_expression_3(self):
+        string = 'int main(){return 1 && 1;}'
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_relationship_expression_1(self):
+        string = 'int main(){return 3.0 > 2.0;}'
+        result = self.get_result_of_main(string)
+        assert result == True
+
+    def test_relationship_expression_2(self):
+        string = 'int main(){return 3.0 > 2;}'
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
     def test_type_casting_int_1(self):
         string = 'int main(){return int 3.0;}'
         result = self.get_result_of_main(string)

@@ -84,12 +84,13 @@ class Environment:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
-        left_side_type = type(expression.left_side)
-        self.check_type(EnvironmentTypesIntoTypes[left_side_type], expression.right_side)
-        operator = expression.operator
-        relationship_function = RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION[operator]
         left_side = expression.left_side.accept(self)
         right_side = expression.right_side.accept(self)
+
+        left_side_type = type(left_side)
+        self.check_type(EnvironmentTypesIntoTypes[left_side_type], right_side)
+        operator = expression.operator
+        relationship_function = RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION[operator]
         return relationship_function(left_side, right_side)
 
     def visit_arithmetic_expression(self, expression: Union[SumExpression, MultiplyExpression]) -> EnvironmentTypes:
