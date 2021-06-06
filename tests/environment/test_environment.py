@@ -16,6 +16,30 @@ class TestEnvironment:
         result = self.get_result_of_main(string)
         assert result == 3
 
+    def test_if_statement(self):
+        string = """
+        int main(){
+            if(true || false) {
+                return 1;
+            }
+            return 0;
+        }"""
+        result = self.get_result_of_main(string)
+        assert result == 1
+
+    def test_nested_if_statement(self):
+        string = """
+        int main(){
+            if(true || false) {
+                if(true && true) {
+                    return 1;
+                }
+            }
+            return 0;
+        }"""
+        result = self.get_result_of_main(string)
+        assert result == 1
+
     def test_or_expression_1(self):
         string = 'int main(){return true || true;}'
         result = self.get_result_of_main(string)

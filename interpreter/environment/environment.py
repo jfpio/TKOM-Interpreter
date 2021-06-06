@@ -1,17 +1,17 @@
 from builtins import str
 from functools import reduce
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 from interpreter.models.base import Constant
-from interpreter.models.constants import Types, RelationshipOperator, RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
+from interpreter.models.constants import Types, RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION, \
     ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION
 from interpreter.models.declarations import ParseTree, VariableDeclaration, CurrencyDeclaration, FunctionDeclaration
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, MultiplyExpression, \
     SumExpression, TypeCastingFactor, NegationFactor
 from interpreter.environment.semantic_errors import SemanticError, SemanticErrorCode, SemanticTypeError
-from interpreter.environment.symbols import VarSymbol, CurrencySymbol, FunctionSymbol
+from interpreter.environment.symbols import VarSymbol, CurrencySymbol
 from interpreter.environment.types import SimpleTypesIntoEnvironmentTypes, EnvironmentTypesIntoTypes, EnvironmentTypes
-from interpreter.models.statements import ReturnStatement
+from interpreter.models.statements import ReturnStatement, IfStatement
 from interpreter.source.source_position import SourcePosition
 
 
@@ -58,29 +58,49 @@ class Environment:
     #     self.functions_declarations[declaration.id] = declaration
 
     def visit_function_call(self, declaration: FunctionDeclaration):
-        for i in declaration.statements.list_of_statements:
-            if isinstance(i, ReturnStatement):
-                return i.expression.accept(self)
+        for statement in declaration.statements:
+            if isinstance(statement, ReturnStatement):
+                return statement.accept(self)
+            statement.accept(self)
 
-    def visit_expression(self, expression: Expression) -> EnvironmentTypes:
+    def visit_if_statement(self, if_statement: IfStatement):
+        condition = if_statement.expression.accept(self)
+        self.check_type(Types.bool, condition, if_statement.expression.source_position)
+        if condition:
+            for statement in if_statement.statements:
+                statement.accept(self)
+
+    def visit_return_statement(self, return_statement: ReturnStatement):
+        # TODO Refactor after add function call
+        if return_statement.expression:
+            return return_statement.expression.accept(self)
+        return None
+
+    def visit_expression(self, expression: Expression) -> Optional[EnvironmentTypes]:
         if len(expression.and_expressions) == 1:
             and_expression = expression.and_expressions[0]
             return and_expression.accept(self)
 
-        and_expressions = [exp.accept(self) for exp in expression.and_expressions]
-        and_expressions = [exp for exp in and_expressions if self.check_type(Types.bool, exp)]
+        and_expressions = []
+        for exp in expression.and_expressions:
+            exp_result = exp.accept(self)
+            self.check_type(Types.bool, exp_result, exp.source_position)
+            and_expressions.append(exp_result)
         return reduce(lambda acc, x: acc or x, and_expressions)
 
-    def visit_and_expression(self, expression: AndExpression) -> EnvironmentTypes:
+    def visit_and_expression(self, expression: AndExpression) -> Optional[EnvironmentTypes]:
         if len(expression.relationship_expressions) == 1:
             relationship_expression = expression.relationship_expressions[0]
             return relationship_expression.accept(self)
 
-        relationship_expressions = [exp.accept(self) for exp in expression.relationship_expressions]
-        and_expressions = [exp for exp in relationship_expressions if self.check_type(Types.bool, exp)]
-        return reduce(lambda acc, x: acc and x, and_expressions)
+        relationship_expressions = []
+        for exp in expression.relationship_expressions:
+            exp_result = exp.accept(self)
+            self.check_type(Types.bool, exp_result, exp.source_position)
+            relationship_expressions.append(exp_result)
+        return reduce(lambda acc, x: acc and x, relationship_expressions)
 
-    def visit_relationship_expression(self, expression: RelationshipExpression) -> EnvironmentTypes:
+    def visit_relationship_expression(self, expression: RelationshipExpression) -> Optional[EnvironmentTypes]:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
@@ -88,26 +108,30 @@ class Environment:
         right_side = expression.right_side.accept(self)
 
         left_side_type = type(left_side)
-        self.check_type(EnvironmentTypesIntoTypes[left_side_type], right_side)
+        self.check_type(EnvironmentTypesIntoTypes[left_side_type], right_side, expression.right_side.source_position)
         operator = expression.operator
         relationship_function = RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION[operator]
         return relationship_function(left_side, right_side)
 
-    def visit_arithmetic_expression(self, expression: Union[SumExpression, MultiplyExpression]) -> EnvironmentTypes:
+    def visit_arithmetic_expression(self, expression: Union[SumExpression, MultiplyExpression]) \
+            -> Optional[EnvironmentTypes]:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
         left_side_type = type(expression.left_side)
-        right_side = [(operator, expression) for operator, expression in expression.right_side
-                      if self.check_type(EnvironmentTypesIntoTypes[left_side_type], expression)]
+        right_side = []
+        for operator, expression in expression.right_side:
+            expression_result = expression.accept(self)
+            self.check_type(EnvironmentTypesIntoTypes[left_side_type], expression_result, expression.source_position)
+            right_side.append((operator, expression_result))
 
         accumulator = expression.left_side.accept(self)
-        for operator, multiply_expression in right_side:
+        for operator, arithmetic_expression in right_side:
             evaluate_function = ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION[operator]
-            accumulator = evaluate_function(accumulator, multiply_expression.accept(self))
+            accumulator = evaluate_function(accumulator, arithmetic_expression)
         return accumulator
 
-    def visit_type_casting_factor(self, factor: TypeCastingFactor) -> EnvironmentTypes:
+    def visit_type_casting_factor(self, factor: TypeCastingFactor) -> Optional[EnvironmentTypes]:
         if not factor.cast_type:
             return factor.negation_factor.accept(self)
 
@@ -122,13 +146,12 @@ class Environment:
             return not value
         return negation_factor.factor.accept(self)
 
-    def visit_factor(self, constant: Constant) -> EnvironmentTypes:
+    def visit_factor(self, constant: Constant) -> Optional[EnvironmentTypes]:
         return constant.value
 
     @staticmethod
-    def check_type(value_type: Types, value) -> bool:
+    def check_type(value_type: Types, value, source_position: SourcePosition) -> bool:
         if isinstance(value, SimpleTypesIntoEnvironmentTypes[value_type]):
             return True
         else:
-            # TODO Fix source position
-            raise SemanticTypeError(SourcePosition(0, 0), value_type, EnvironmentTypesIntoTypes[type(value)])
+            raise SemanticTypeError(source_position, value_type, EnvironmentTypesIntoTypes[type(value)])

@@ -150,7 +150,7 @@ class Parser:
               ), ";")
               | (
                 whileStatement
-                | ifStatement
+                | if_statement
               )
         };
         """
@@ -168,7 +168,7 @@ class Parser:
                 self.consume_token(TokenType.SEMICOLON)
             else:
                 break
-        return Statements(statements)
+        return statements
 
     def parse_assignment_or_function_call(self) -> Optional[Union[Assignment, FunctionCall]]:
         if self.token.type != TokenType.ID:
@@ -211,7 +211,7 @@ class Parser:
 
     def parse_if_statement(self) -> Optional[IfStatement]:
         """
-        ifStatement = "if", "(", expression, ")", "{", statements, "}";
+        if_statement = "if", "(", expression, ")", "{", statements, "}";
         """
         if self.token.type != TokenType.IF_NAME:
             return None

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, List, Optional
+from typing import List, Optional
 
 from interpreter.models.base import Param, ParseTreeNode
 from interpreter.models.constants import Types

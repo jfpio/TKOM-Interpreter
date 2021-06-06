@@ -34,7 +34,7 @@ andExpression = relationshipExpression, {"and", relationshipExpression};
 relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
 sumExpression = multiplyExpression, {sumOperand, multiplyExpression};
 multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
-typeCastingFactor = ["(", type, ")"], negationFactor;
+typeCastingFactor = [type], negationFactor;
 negationFactor = ["!"], factor;
 
 (*Assigment and expression have same beginning: ID *)

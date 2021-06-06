@@ -6,7 +6,7 @@ from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Constant, Param, Variable
 from interpreter.models.constants import Types
 from interpreter.models.declarations import CurrencyDeclaration, Declaration, VariableDeclaration, FunctionDeclaration
-from interpreter.models.statements import Statements, ReturnStatement
+from interpreter.models.statements import ReturnStatement
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
@@ -57,8 +57,8 @@ class TestParserDeclarations:
         assert declaration == FunctionDeclaration(
             SourcePosition(1, len(string)), Types.int, 'a',
             [Param(SourcePosition(1, 11), 'b', Types.int), Param(SourcePosition(1, 18), 'c', Types.int)],
-            Statements([ReturnStatement(SourcePosition(1, 28),
-                                        simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))]))
+            [ReturnStatement(SourcePosition(1, 28),
+                             simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))])
 
     def test_function_declaration_2(self):
         string = 'int a(){}'
@@ -67,7 +67,7 @@ class TestParserDeclarations:
         assert declaration == FunctionDeclaration(
             SourcePosition(1, len(string)), Types.int, 'a',
             [],
-            Statements([]))
+            [])
 
     @staticmethod
     def _get_program_declarations(string: str) -> List[Declaration]:
