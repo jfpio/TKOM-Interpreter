@@ -117,9 +117,7 @@ class Environment:
             i += 1
 
     def visit_return_statement(self, return_statement: ReturnStatement):
-        return_value = None
-        if return_statement.expression:
-            return_value = return_statement.expression.accept(self)
+        return_value = return_statement.expression.accept(self)
 
         self.current_frame.check_return_value(return_value, return_statement.source_position)
         return return_value
@@ -166,14 +164,15 @@ class Environment:
         if expression.right_side is None:
             return expression.left_side.accept(self)
 
-        left_side_type = type(expression.left_side)
+        left_side = expression.left_side.accept(self)
+        left_side_type = type(left_side)
         right_side = []
         for operator, expression in expression.right_side:
             expression_result = expression.accept(self)
             self.check_type(left_side_type, expression_result, expression.source_position)
             right_side.append((operator, expression_result))
 
-        accumulator = expression.left_side.accept(self)
+        accumulator = left_side
         for operator, arithmetic_expression in right_side:
             evaluate_function = ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION[operator]
             accumulator = evaluate_function(accumulator, arithmetic_expression)
@@ -194,10 +193,10 @@ class Environment:
 
     def cast(self, casting_type: CustomTypeOfTypes, value: PossibleTypes, source_position: SourcePosition) \
             -> PossibleTypes:
-        if casting_type is CurrencyType:
+        if isinstance(casting_type, CurrencyType):
             if type(value) is float:
                 return CurrencyValue(casting_type.name, float(value))
-            elif type(value) is CurrencyType and casting_type is CurrencyType:
+            elif isinstance(value, CurrencyType):
                 to_cast_currency = self.get_currency_declaration(casting_type.name, source_position)
                 casting_currency = self.get_currency_declaration(value.name, source_position)
                 new_value = casting_currency.value / to_cast_currency.value

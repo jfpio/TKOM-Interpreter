@@ -11,8 +11,7 @@ class CurrencyType:
 
 
 @dataclass
-class CurrencyValue:
-    name: str
+class CurrencyValue(CurrencyType):
     value: float
 
     def __str__(self):

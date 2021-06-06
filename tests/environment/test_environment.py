@@ -5,7 +5,7 @@ import pytest
 from interpreter.environment.environment import Environment
 from interpreter.environment.environment_errors import SemanticTypeError, RunTimeEnvError
 from interpreter.lexer.lexer import Lexer
-from interpreter.models.constants import PossibleTypes
+from interpreter.models.constants import PossibleTypes, CurrencyValue
 from interpreter.parser.parser import Parser
 from interpreter.source.source import Source
 
@@ -109,16 +109,52 @@ class TestEnvironment:
         with pytest.raises(SemanticTypeError):
             self.get_result_of_main(string)
 
-    def test_type_casting_int_1(self):
+    def test_type_casting_1(self):
         string = 'int main(){return int 3.0;}'
         result = self.get_result_of_main(string)
         assert result == 3
 
-    def test_type_casting_int_2(self):
-        # string = 'int main(){return EUR 3.0;}'
-        # result = self.get_result_of_main(string)
-        # assert result == 3
-        pass
+    def test_type_casting_2(self):
+        string = """
+        EUR := 2.0;
+        
+        EUR main(){return EUR 3.0;}
+        """
+        result = self.get_result_of_main(string)
+        assert result == CurrencyValue('EUR', 3.0)
+
+    def test_type_casting_3(self):
+        string = """
+        EUR := 2.0;
+        USD := 1.0;
+
+        EUR main(){
+        return 3.0USD;
+        }
+        """
+        with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_type_casting_4(self):
+        string = """
+        EUR := 2.0;
+        USD := 1.0;
+
+        EUR main(){
+        return EUR 1.0USD;
+        }
+        """
+        result = self.get_result_of_main(string)
+        assert result == CurrencyValue('EUR', 0.5)
+
+    def test_arithmetic_order(self):
+        string = """
+        int main(){
+            return 2 + 2 * 2;
+        }
+        """
+        result = self.get_result_of_main(string)
+        assert result == 6
 
     def test_negation_success(self):
         string = 'bool main(){return !true;}'

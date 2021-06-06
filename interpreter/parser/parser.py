@@ -3,7 +3,7 @@ from typing import List, Union, Optional
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND, TOKEN_TYPE_INTO_SUM_OPERATOR, \
     token_type_into_mul_operator, TOKEN_TYPES_INTO_TYPES, CurrencyType, POSSIBLE_TOKEN_TYPES, \
-    CustomTypeOfTypes
+    CustomTypeOfTypes, CurrencyValue
 from interpreter.models.declarations import Declaration, CurrencyDeclaration, VariableDeclaration, \
     FunctionDeclaration, ParseTree
 from interpreter.models.base import FunctionCall, Constant, Variable, Factor, Assignment, Param
@@ -375,9 +375,15 @@ class Parser:
                                    TokenType.BOOL_VALUE,
                                    TokenType.CURRENCY_VALUE]:
             return None
-        constant = Constant(self.token.source_position, self.token.value)
+        source_position = self.token.source_position
+        value = self.token.value
+
         self.next_token()
-        return constant
+        if self.token.type == TokenType.CURRENCY:
+            constant = Constant(self.token.source_position, CurrencyValue(self.token.value, value))
+            self.next_token()
+            return constant
+        return Constant(source_position, value)
 
     def parse_function_call(self, id: str) -> Optional[FunctionCall]:
         """

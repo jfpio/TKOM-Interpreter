@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Union, List
 
-from interpreter.models.constants import CurrencyType, CustomTypeOfTypes
+from interpreter.models.constants import CustomTypeOfTypes, PossibleTypes
 from interpreter.source.source_position import SourcePosition
 
 
@@ -13,7 +13,7 @@ class ParseTreeNode(ABC):
 
 @dataclass
 class Constant(ParseTreeNode):
-    value: Union[str, int, float, bool, CurrencyType]
+    value: PossibleTypes
 
     def accept(self, visitor: 'Environment'):
         return visitor.visit_constant(self)

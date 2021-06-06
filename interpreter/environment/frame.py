@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from interpreter.environment.environment_errors import SemanticError, SemanticErrorCode, SemanticTypeError
-from interpreter.models.constants import PossibleTypes
+from interpreter.models.constants import PossibleTypes, CurrencyValue, CurrencyType
 from interpreter.models.declarations import FunctionDeclaration
 from interpreter.source.source_position import SourcePosition
 
@@ -22,7 +22,13 @@ class Frame:
                 raise SemanticTypeError(source_position, param.type, type(param_value))
             self.local_variables[param.id] = param_value
 
-    def check_return_value(self, value: PossibleTypes, source_position: SourcePosition):
-        if type(value) != self.return_value_type:
+    def check_return_value(self, value: PossibleTypes, source_position: SourcePosition) -> bool:
+        if isinstance(value, CurrencyValue) and isinstance(self.return_value_type, CurrencyType):
+            if value.name != self.return_value_type.name:
+                raise SemanticTypeError(source_position, self.return_value_type, value)
+            self.return_value = value
+            return True
+        elif type(value) != self.return_value_type:
             raise SemanticTypeError(source_position, self.return_value_type, type(value))
         self.return_value = value
+        return True
