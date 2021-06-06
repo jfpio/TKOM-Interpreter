@@ -2,7 +2,7 @@ import io
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Constant
-from interpreter.models.constants import SimpleTypes, CurrencyType, MulOperator, SumOperator, RelationshipOperator
+from interpreter.models.constants import CurrencyType, MulOperator, SumOperator, RelationshipOperator
 from interpreter.models.expressions import NegationFactor, TypeCastingFactor, MultiplyExpression, SumExpression, \
     RelationshipExpression, AndExpression, Expression
 from interpreter.parser.parser import Parser
@@ -51,7 +51,7 @@ class TestParserConstructions:
                TypeCastingFactor(source_position,
                                  NegationFactor(source_position,
                                                 Constant(SourcePosition(1, len(string)), True), False),
-                                 SimpleTypes.int)
+                                 int)
 
     def test_multiply_expression(self):
         string = '4 * 4 / 5 % 3'

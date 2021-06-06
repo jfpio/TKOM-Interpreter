@@ -1,25 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union
+from typing import Union, Type
 
 from interpreter.token.token_type import TokenType
-
-
-class SimpleTypes(Enum):
-    int = 'int'
-    float = 'float'
-    string = 'string'
-    bool = 'bool'
-    currency = 'currency'
-
-
-TOKEN_TYPES_INTO_TYPES = {
-    TokenType.INT: SimpleTypes.int,
-    TokenType.FLOAT: SimpleTypes.float,
-    TokenType.STRING: SimpleTypes.string,
-    TokenType.BOOL: SimpleTypes.bool,
-}
-POSSIBLE_TOKEN_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 @dataclass
@@ -27,8 +10,37 @@ class CurrencyType:
     name: str
 
 
-# TODO Change Simple Types into Types
-Types = Union[SimpleTypes, CurrencyType]
+@dataclass
+class CurrencyValue:
+    name: str
+    value: float
+
+    def __str__(self):
+        return f"{self.value}{self.name}"
+
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return self.value
+
+    def __bool__(self):
+        if self.value == 0:
+            return False
+        else:
+            return True
+
+
+CustomTypeTypes = Union[Type, CurrencyType]
+PossibleTypes = Union[int, float, str, bool, CurrencyValue]
+
+TOKEN_TYPES_INTO_TYPES = {
+    TokenType.INT: int,
+    TokenType.FLOAT: float,
+    TokenType.STRING: str,
+    TokenType.BOOL: bool,
+}
+POSSIBLE_TOKEN_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 class RelationshipOperator(Enum):

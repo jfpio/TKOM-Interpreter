@@ -2,8 +2,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional, List, Union
 
-from interpreter.environment.types import EnvironmentTypes
 from interpreter.models.base import Assignment, FunctionCall
+from interpreter.models.constants import PossibleTypes
 from interpreter.models.expressions import Expression
 from interpreter.source.source_position import SourcePosition
 
@@ -17,7 +17,7 @@ class Statement(ABC):
 class ReturnStatement(Statement):
     expression: Optional['Expression']
 
-    def accept(self, visitor: 'Environment') -> Optional[EnvironmentTypes]:
+    def accept(self, visitor: 'Environment') -> Optional[PossibleTypes]:
         return visitor.visit_return_statement(self)
 
 
@@ -26,7 +26,7 @@ class WhileStatement(Statement):
     expression: 'Expression'
     statements: 'Statements'
 
-    def accept(self, visitor: 'Environment') -> Optional[EnvironmentTypes]:
+    def accept(self, visitor: 'Environment') -> Optional[PossibleTypes]:
         return visitor.visit_while_statement(self)
 
 
@@ -35,7 +35,7 @@ class IfStatement(Statement):
     expression: 'Expression'
     statements: 'Statements'
 
-    def accept(self, visitor: 'Environment') -> Optional[EnvironmentTypes]:
+    def accept(self, visitor: 'Environment') -> Optional[PossibleTypes]:
         return visitor.visit_if_statement(self)
 
 
