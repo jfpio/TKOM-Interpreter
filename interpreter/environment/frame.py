@@ -1,6 +1,6 @@
 from typing import Dict, Optional, List
 
-from interpreter.environment.semantic_errors import SemanticError, SemanticErrorCode
+from interpreter.environment.environment_errors import SemanticError, SemanticErrorCode
 from interpreter.environment.types import EnvironmentTypes
 from interpreter.models.declarations import VariableDeclaration, FunctionDeclaration
 from interpreter.source.source_position import SourcePosition

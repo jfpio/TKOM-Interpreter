@@ -1,4 +1,3 @@
-from builtins import str
 from functools import reduce
 from typing import Dict, Union, Optional
 
@@ -9,9 +8,10 @@ from interpreter.models.constants import SimpleTypes, RELATIONSHIP_OPERAND_INTO_
 from interpreter.models.declarations import ParseTree, VariableDeclaration, CurrencyDeclaration, FunctionDeclaration
 from interpreter.models.expressions import Expression, AndExpression, RelationshipExpression, MultiplyExpression, \
     SumExpression, TypeCastingFactor, NegationFactor
-from interpreter.environment.semantic_errors import SemanticError, SemanticErrorCode, SemanticTypeError
+from interpreter.environment.environment_errors import SemanticError, SemanticErrorCode, SemanticTypeError, \
+    RunTimeEnvError, RuntimeErrorCode
 from interpreter.environment.types import SimpleTypesIntoEnvironmentTypes, EnvironmentTypesIntoTypes, EnvironmentTypes
-from interpreter.models.statements import ReturnStatement, IfStatement, Statements
+from interpreter.models.statements import ReturnStatement, IfStatement, Statements, WhileStatement
 from interpreter.source.source_position import SourcePosition
 
 
@@ -60,15 +60,32 @@ class Environment:
     def visit_statements(self, statements: Statements):
         for statement in statements.list_of_statements:
             return_value = None
-            while return_value is None:
-                return_value = statement.accept(self)
+            return_value = statement.accept(self)
             return return_value
+        return None
 
     def visit_if_statement(self, if_statement: IfStatement):
         condition = if_statement.expression.accept(self)
         self.check_type(SimpleTypes.bool, condition, if_statement.expression.source_position)
         if condition:
             return if_statement.statements.accept(self)
+
+    def visit_while_statement(self, while_statement: WhileStatement):
+        condition = while_statement.expression.accept(self)
+        self.check_type(SimpleTypes.bool, condition, while_statement.expression.source_position)
+        i = 0
+
+        while condition:
+            return_value = while_statement.statements.accept(self)
+            if return_value:
+                return return_value
+            if i == 100:
+                raise RunTimeEnvError(while_statement.source_position,
+                                      RuntimeErrorCode.INFINITE_LOOP,
+                                      self.current_frame.function_name)
+
+            condition = while_statement.expression.accept(self)
+            i += 1
 
     def visit_return_statement(self, return_statement: ReturnStatement):
         return_value = None

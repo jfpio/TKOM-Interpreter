@@ -3,7 +3,7 @@ import io
 import pytest
 
 from interpreter.environment.environment import Environment
-from interpreter.environment.semantic_errors import SemanticTypeError
+from interpreter.environment.environment_errors import SemanticTypeError, RunTimeEnvError
 from interpreter.environment.types import EnvironmentTypes
 from interpreter.lexer.lexer import Lexer
 from interpreter.parser.parser import Parser
@@ -39,6 +39,35 @@ class TestEnvironment:
         }"""
         result = self.get_result_of_main(string)
         assert result == 1
+
+    def test_while_statement_1(self):
+        string = """
+        int main(){
+            while(true) {
+                    return 1;
+            }
+            return 0;
+        }"""
+        result = self.get_result_of_main(string)
+        assert result == 1
+
+    def test_while_statement_2(self):
+        string = """
+        int main(){
+            while(true) {
+            }
+        }"""
+        with pytest.raises(RunTimeEnvError):
+            self.get_result_of_main(string)
+
+    def test_while_statement_3(self):
+        string = """
+        int main(){
+            while(false) {
+            }
+        }"""
+        with pytest.raises(RunTimeEnvError):
+            self.get_result_of_main(string)
 
     def test_or_expression_1(self):
         string = 'int main(){return true || true;}'

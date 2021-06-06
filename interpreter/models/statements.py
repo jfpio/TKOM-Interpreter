@@ -26,6 +26,9 @@ class WhileStatement(Statement):
     expression: 'Expression'
     statements: 'Statements'
 
+    def accept(self, visitor: 'Environment') -> Optional[EnvironmentTypes]:
+        return visitor.visit_while_statement(self)
+
 
 @dataclass
 class IfStatement(Statement):
