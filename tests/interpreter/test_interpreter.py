@@ -1,7 +1,7 @@
 import io
 
 from interpreter.lexer.lexer import Lexer
-from interpreter.main import Interpreter
+from interpreter.__main__ import Interpreter
 from interpreter.parser.parser import Parser
 from interpreter.source.source import Source
 

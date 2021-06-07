@@ -13,7 +13,7 @@ class Interpreter:
 
 
 if __name__ == "__main__":
-    with open('../inputfile.curr', 'r') as file:
+    with open('inputfile.curr', 'r') as file:
         source = Source(file)
         interpreter = Interpreter(source)
         print(str(interpreter.result))
