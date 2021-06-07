@@ -14,7 +14,11 @@ Jan Piotrowski
 
 Firstly write something in inputfile.curr and run:
 
-`$ python3 -m interpreter`
+`$ python3 -m interpreter [inputfile]`
+
+You can use my test file!
+
+`$ python3 -m interpreter inputfile.curr`
 
 # Static Type Checking
 

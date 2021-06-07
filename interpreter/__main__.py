@@ -1,3 +1,5 @@
+import sys
+
 from interpreter.environment.environment import Environment
 from interpreter.lexer.lexer import Lexer
 from interpreter.parser.parser import Parser
@@ -13,7 +15,8 @@ class Interpreter:
 
 
 if __name__ == "__main__":
-    with open('inputfile.curr', 'r') as file:
-        source = Source(file)
-        interpreter = Interpreter(source)
-        print(str(interpreter.result))
+    if len(sys.argv) == 2:
+        with open(sys.argv[1], 'r') as file:
+            source = Source(file)
+            interpreter = Interpreter(source)
+            print(str(interpreter.result))
