@@ -277,6 +277,7 @@ class TestEnvironment:
     def test_recursion(self):
         string = \
             """
+            USD := 3.0;
             float power(float basis, int exponent) {
                 if (exponent == 0) {
                     return 1.0;
@@ -299,6 +300,7 @@ class TestEnvironment:
     def test_while_loop(self):
         string = \
             """
+            USD := 3.0;
             USD compound_interest(USD capital, float interest_rate, int number_of_times) {
                 int i = number_of_times;
                 USD sum = capital;

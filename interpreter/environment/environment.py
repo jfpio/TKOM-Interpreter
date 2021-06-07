@@ -58,8 +58,12 @@ class Environment:
             raise SemanticError(declaration.source_position, SemanticErrorCode.DUPLICATE_ID, declaration.id)
         self.functions_declarations[declaration.id] = declaration
 
-    @staticmethod
-    def visit_constant(constant: Constant) -> Optional[PossibleTypes]:
+    def visit_constant(self, constant: Constant) -> Optional[PossibleTypes]:
+        value = constant.value
+        if isinstance(value, CurrencyValue):
+            currency_name = value.name
+            if currency_name not in self.currency_declarations:
+                raise SemanticError(constant.source_position, SemanticErrorCode.CURR_ID_NOT_FOUND)
         return constant.value
 
     def visit_variable(self, variable: Variable):
