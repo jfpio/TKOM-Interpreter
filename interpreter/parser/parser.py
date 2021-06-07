@@ -400,7 +400,10 @@ class Parser:
             while expression := self.parse_expression():
                 expressions.append(expression)
                 if self.token.type != TokenType.COMMA:
-                    break
+                    if self.token.type == TokenType.RIGHT_BRACKET:
+                        break
+                    else:
+                        raise ParserError(self.token.source_position, self.token.type, [TokenType.RIGHT_BRACKET])
                 self.next_token()
 
         self.next_token()

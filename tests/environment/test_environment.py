@@ -7,6 +7,7 @@ from interpreter.environment.environment_errors import SemanticTypeError, RunTim
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.constants import PossibleTypes, CurrencyValue
 from interpreter.parser.parser import Parser
+from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
 
 
@@ -261,6 +262,16 @@ class TestEnvironment:
         }
         """
         with pytest.raises(SemanticTypeError):
+            self.get_result_of_main(string)
+
+    def test_assignment_4(self):
+        string = """
+        int main(){
+        int a == 3.0;
+        return a;
+        }
+        """
+        with pytest.raises(ParserError):
             self.get_result_of_main(string)
 
     def test_recursion(self):

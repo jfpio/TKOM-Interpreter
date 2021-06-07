@@ -56,6 +56,11 @@ class TestParserNegative:
         with pytest.raises(ParserError):
             self.parse_program(string)
 
+    def test_wrong_arguments(self):
+        string = 'int main(){a(a b);}'
+        with pytest.raises(ParserError):
+            self.parse_program(string)
+
     @staticmethod
     def parse_program(string: str) -> ParseTree:
         source = Source(io.StringIO(string))
