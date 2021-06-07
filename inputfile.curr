@@ -1,0 +1,13 @@
+USD compound_interest(USD capital, float interest_rate, int number_of_times) {
+    int i = number_of_times;
+    USD sum = capital;
+
+    while(i != 0) {
+        sum = sum * (1 + interest_rate);
+        i = i - 1;
+    }
+    return sum;
+}
+USD main(){
+    return compound_interest(10USD, 0.1, 5);
+}
