@@ -77,7 +77,7 @@ class TestIntegratedTokens:
             self._get_tokens("US : 3.92;")
 
     def test_sum(self):
-        string = "sum = a + b; /*4.16USD*/"
+        string = "sum = a + b; /* 4.16USD */ "
 
         tokens = self._get_tokens(string)
         token_types = [token.type for token in tokens]

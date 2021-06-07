@@ -20,7 +20,7 @@ class Parser:
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         self.token = lexer.get_next_token()
-        self.previous_token = self.token  # TODO remove that
+        self.previous_token = self.token
 
     def parse_program(self) -> ParseTree:
         """

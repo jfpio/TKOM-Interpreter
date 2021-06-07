@@ -79,6 +79,7 @@ class Lexer:
             if char == "*":
                 self._skip_comment()
                 self._next_char()
+                self._skip_whitespace()
             else:
                 token = Token(TokenType.DIV_OPERATOR, '', self._previous_position)
                 self._next_char()

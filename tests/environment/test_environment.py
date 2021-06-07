@@ -156,6 +156,17 @@ class TestEnvironment:
         result = self.get_result_of_main(string)
         assert result == 6
 
+    def test_strings(self):
+        string = """
+        string main(){
+            string a = "aa";
+            string b = "bb";
+            return a + b;
+        }
+        """
+        result = self.get_result_of_main(string)
+        assert result == "aabb"
+
     def test_negation_success(self):
         string = 'bool main(){return !true;}'
         result = self.get_result_of_main(string)
@@ -251,6 +262,49 @@ class TestEnvironment:
         """
         with pytest.raises(SemanticTypeError):
             self.get_result_of_main(string)
+
+    def test_recursion(self):
+        string = \
+            """
+            float power(float basis, int exponent) {
+                if (exponent == 0) {
+                    return 1.0;
+                }
+                return basis * power(basis, exponent - 1);
+            }
+    
+            USD compound_interest(USD capital, float interest_rate, int number_of_times) {
+                return capital * power(1.0 + interest_rate, number_of_times);
+            }
+            
+            USD main(){
+            return compound_interest(10USD, 0.1, 5); 
+            }
+            """
+        result = self.get_result_of_main(string)
+        result = CurrencyValue(result.name, round(result.value, 4))
+        assert result == CurrencyValue('USD', 16.1051)
+
+    def test_while_loop(self):
+        string = \
+            """
+            USD compound_interest(USD capital, float interest_rate, int number_of_times) {
+                int i = number_of_times;
+                USD sum = capital;
+            
+                while(i != 0) {
+                    sum = sum * (1 + interest_rate);
+                    i = i - 1;       
+                }
+                return sum;
+            }
+            USD main(){
+            return compound_interest(10USD, 0.1, 5); 
+            }
+            """
+        result = self.get_result_of_main(string)
+        result = CurrencyValue(result.name, round(result.value, 4))
+        assert result == CurrencyValue('USD', 16.1051)
 
     @staticmethod
     def get_result_of_main(string) -> PossibleTypes:

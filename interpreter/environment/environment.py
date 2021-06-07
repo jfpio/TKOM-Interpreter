@@ -32,7 +32,9 @@ class Environment:
 
     def run_main(self) -> Optional[PossibleTypes]:
         main_function = self.functions_declarations['main']
-        return main_function.statements.accept(self)
+        main_function_call = FunctionCall(SourcePosition(0, 0), 'main', [])
+
+        return main_function_call.accept(self)
 
     def visit_variable_declaration(self, declaration: VariableDeclaration, global_declaration: bool):
         if global_declaration:
@@ -120,6 +122,9 @@ class Environment:
         return_value = return_statement.expression.accept(self)
 
         self.current_frame.check_return_value(return_value, return_statement.source_position)
+
+        frame = self.frames_stack.pop()
+        self.current_frame = frame
         return return_value
 
     def visit_expression(self, expression: Expression) -> Optional[PossibleTypes]:
@@ -165,11 +170,9 @@ class Environment:
             return expression.left_side.accept(self)
 
         left_side = expression.left_side.accept(self)
-        left_side_type = type(left_side)
         right_side = []
         for operator, expression in expression.right_side:
             expression_result = expression.accept(self)
-            self.check_type(left_side_type, expression_result, expression.source_position)
             right_side.append((operator, expression_result))
 
         accumulator = left_side
@@ -227,5 +230,8 @@ class Environment:
     def check_type(value_type: CustomTypeOfTypes, value, source_position: SourcePosition) -> bool:
         if type(value) == value_type:
             return True
+        elif isinstance(value, CurrencyValue) and isinstance(value_type, CurrencyType):
+            if value.name != value_type.name:
+                raise SemanticTypeError(source_position, value_type, type(value))
         else:
             raise SemanticTypeError(source_position, value_type, type(value))

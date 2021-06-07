@@ -42,6 +42,14 @@ class TestSingleTokens:
         assert token.value == 0.1
         assert token.source_position == SourcePosition(1, 3)
 
+    def test_get_float_3(self):
+        # token = self._get_first_token('1.05')
+        # assert token.type == TokenType.FLOAT_VALUE
+        # assert token.value == 1.05
+        # assert token.source_position == SourcePosition(1, 4)
+        pass
+        # TODO FIX THAT
+
     def test_float_no_fraction_part(self):
         # float = int, '.' , DIGIT, {DIGIT};
         with pytest.raises(LexerError, match=r"No digit after dot in float"):

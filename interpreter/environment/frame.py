@@ -18,7 +18,10 @@ class Frame:
             raise SemanticError(source_position, SemanticErrorCode.WRONG_NUMBER_OF_PARAMS, function_declaration.id)
 
         for param, param_value in zip(function_declaration.params, params_values_list):
-            if param.type != type(param_value):
+            if isinstance(param_value, CurrencyValue) and isinstance(param.type, CurrencyType):
+                if param_value.name != param.type.name:
+                    raise SemanticTypeError(source_position, param.type, type(param_value))
+            elif param.type != type(param_value):
                 raise SemanticTypeError(source_position, param.type, type(param_value))
             self.local_variables[param.id] = param_value
 

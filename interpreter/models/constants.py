@@ -14,6 +14,21 @@ class CurrencyType:
 class CurrencyValue(CurrencyType):
     value: float
 
+    def __add__(self, other):
+        return CurrencyValue(self.name, self.value + other.value)
+
+    def __sub__(self, other):
+        return CurrencyValue(self.name, self.value - other.value)
+
+    def __mul__(self, other):
+        return CurrencyValue(self.name, self.value * other)
+
+    def __truediv__(self, other):
+        return CurrencyValue(self.name, self.value / other)
+
+    def __divmod__(self, other):
+        return CurrencyValue(self.name, self.value % other)
+
     def __str__(self):
         return f"{self.value}{self.name}"
 
