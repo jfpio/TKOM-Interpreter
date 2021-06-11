@@ -12,7 +12,7 @@ Jan Piotrowski
 
 # Run program
 
-Firstly write something in inputfile.curr and run:
+First write something in inputfile.curr and run:
 
 `$ python3 -m interpreter [inputfile]`
 

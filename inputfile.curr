@@ -1,3 +1,5 @@
+USD := 4.0;
+
 USD compound_interest(USD capital, float interest_rate, int number_of_times) {
     int i = number_of_times;
     USD sum = capital;

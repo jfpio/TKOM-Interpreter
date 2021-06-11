@@ -63,7 +63,7 @@ class Environment:
         if isinstance(value, CurrencyValue):
             currency_name = value.name
             if currency_name not in self.currency_declarations:
-                raise SemanticError(constant.source_position, SemanticErrorCode.CURR_ID_NOT_FOUND)
+                raise SemanticError(constant.source_position, SemanticErrorCode.CURR_ID_NOT_FOUND, currency_name)
         return constant.value
 
     def visit_variable(self, variable: Variable):
