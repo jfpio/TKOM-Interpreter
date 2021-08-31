@@ -4,9 +4,8 @@ import pytest
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Constant, Param, Variable
-from interpreter.models.constants import Types
 from interpreter.models.declarations import CurrencyDeclaration, Declaration, VariableDeclaration, FunctionDeclaration
-from interpreter.models.statements import Statements, ReturnStatement
+from interpreter.models.statements import ReturnStatement, Statements
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
@@ -41,31 +40,31 @@ class TestParserDeclarations:
         string = 'int a = 4.92;'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
-        assert declaration == VariableDeclaration(SourcePosition(1, 12), Types.int, 'a',
+        assert declaration == VariableDeclaration(SourcePosition(1, 12), int, 'a',
                                                   simple_expression_factory(Constant(SourcePosition(1, 12), 4.92)))
 
     def test_variable_declaration_2(self):
         string = 'int a;'
-        declarations = self._get_program_declarations(string)
-        declaration = declarations[0]
-        assert declaration == VariableDeclaration(SourcePosition(1, 5), Types.int, 'a', None)
+        with pytest.raises(ParserError):
+            self._get_program_declarations(string)
 
     def test_function_declaration_1(self):
         string = 'int a(int b, int c){return b;}'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
         assert declaration == FunctionDeclaration(
-            SourcePosition(1, len(string)), Types.int, 'a',
-            [Param('b', Types.int), Param('c', Types.int)],
-            Statements([ReturnStatement(SourcePosition(1, 28),
-                                        simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))]))
+            SourcePosition(1, len(string)), int, 'a',
+            [Param(SourcePosition(1, 11), 'b', int), Param(SourcePosition(1, 18), 'c', int)],
+            Statements(
+                [ReturnStatement(SourcePosition(1, 28),
+                                 simple_expression_factory(Variable(SourcePosition(1, 28), 'b')))]))
 
     def test_function_declaration_2(self):
         string = 'int a(){}'
         declarations = self._get_program_declarations(string)
         declaration = declarations[0]
         assert declaration == FunctionDeclaration(
-            SourcePosition(1, len(string)), Types.int, 'a',
+            SourcePosition(1, len(string)), int, 'a',
             [],
             Statements([]))
 
@@ -74,8 +73,8 @@ class TestParserDeclarations:
         source = Source(io.StringIO(string))
         lexer = Lexer(source)
         parser = Parser(lexer)
-
-        return parser.parse_program()
+        parse_tree = parser.parse_program()
+        return parse_tree.declarations
 
     @staticmethod
     def _get_parser(string: str) -> Parser:

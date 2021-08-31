@@ -4,9 +4,9 @@ program = declaration, {declaration};
 declaration = (varDeclaration | currencyDeclaration, ";") |  functionDeclaration;
 
 (* CURRENCY *)
-currencyDeclaration = currency_ID, ":=", float | int;
+currencyDeclaration = currency_ID, ":=", float;
 (* VARIABLE *)
-varDeclaration = type, ID, ['=', expression];
+varDeclaration = type, ID, '=', expression;
 (* FUNCTION *)
 functionDeclaration = type, ID, "(", parms, ")", "{", statements, "}";
 parms = [type, ID, {",", type, ID}];
@@ -15,8 +15,7 @@ parms = [type, ID, {",", type, ID}];
 statements = {
       ((
          varDeclaration 
-         | currencyDeclaration 
-         | ID, (restOfAssignment | restOfFunctionCall) 
+         | ID, (restOfAssignment | restOfFunctionCall)
          | returnStatement
       ), ";")
       | (
@@ -25,7 +24,7 @@ statements = {
       )
       };
 
-returnStatement = "return", [expression];
+returnStatement = "return", expression;
 whileStatement = "while", "(", expression, ")", "{", statements, "}";
 ifStatement = "if", "(", expression, ")", "{", statements, "}";
 
@@ -35,7 +34,7 @@ andExpression = relationshipExpression, {"and", relationshipExpression};
 relationshipExpression = sumExpression, [relationshipExpression, sumExpression];
 sumExpression = multiplyExpression, {sumOperand, multiplyExpression};
 multiplyExpression = typeCastingFactor, {multiplyOperand, typeCastingFactor};
-typeCastingFactor = ["(", type, ")"], negationFactor;
+typeCastingFactor = [type], negationFactor;
 negationFactor = ["!"], factor;
 
 (*Assigment and expression have same beginning: ID *)
@@ -82,13 +81,12 @@ type =
    | "float"
    | "string"
    | "bool"
-   | "void"
    | currency_ID
 ;
 
 int = [-], "0" | "1-9",{DIGIT};
 float = int, '.' , DIGIT, {DIGIT};
-currency = (int | float), currency_ID;
+currency = (float), currency_ID;
 
 string = "'", {CHAR} "'";
 

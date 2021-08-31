@@ -37,7 +37,6 @@ class Lexer:
         'int': TokenType.INT,
         'float': TokenType.FLOAT,
         'string': TokenType.STRING,
-        'void': TokenType.VOID,
         'bool': TokenType.BOOL,
         'currency': TokenType.CURRENCY,
         'true': TokenType.BOOL_VALUE,
@@ -80,6 +79,7 @@ class Lexer:
             if char == "*":
                 self._skip_comment()
                 self._next_char()
+                self._skip_whitespace()
             else:
                 token = Token(TokenType.DIV_OPERATOR, '', self._previous_position)
                 self._next_char()
@@ -206,6 +206,8 @@ class Lexer:
             raise LexerError(f"No digit after dot in float", self._get_position())
 
         fractional_part = self.build_integer_part_of_the_number()
+        if fractional_part == 0:
+            return Token(TokenType.FLOAT_VALUE, float(integer_part), self._previous_position)
         digits = int(math.log10(fractional_part)) + 1
         number = float(integer_part) + fractional_part * 10 ** -digits
         return Token(TokenType.FLOAT_VALUE, number, self._previous_position)

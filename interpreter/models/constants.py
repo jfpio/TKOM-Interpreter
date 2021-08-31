@@ -1,30 +1,60 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union, Type
 
 from interpreter.token.token_type import TokenType
-
-
-class Types(Enum):
-    int = 'int'
-    float = 'float'
-    string = 'string'
-    bool = 'bool'
-    void = 'void'
-
-
-TOKEN_TYPES_INTO_TYPES = {
-    TokenType.INT: Types.int,
-    TokenType.FLOAT: Types.float,
-    TokenType.STRING: Types.string,
-    TokenType.BOOL: Types.bool,
-    TokenType.VOID: Types.void
-}
-POSSIBLE_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 @dataclass
 class CurrencyType:
     name: str
+
+
+@dataclass
+class CurrencyValue(CurrencyType):
+    value: float
+
+    def __add__(self, other):
+        return CurrencyValue(self.name, self.value + other.value)
+
+    def __sub__(self, other):
+        return CurrencyValue(self.name, self.value - other.value)
+
+    def __mul__(self, other):
+        return CurrencyValue(self.name, self.value * other)
+
+    def __truediv__(self, other):
+        return CurrencyValue(self.name, self.value / other)
+
+    def __divmod__(self, other):
+        return CurrencyValue(self.name, self.value % other)
+
+    def __str__(self):
+        return f"{self.value}{self.name}"
+
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return self.value
+
+    def __bool__(self):
+        if self.value == 0:
+            return False
+        else:
+            return True
+
+
+CustomTypeOfTypes = Union[Type, CurrencyType]
+PossibleTypes = Union[int, float, str, bool, CurrencyValue]
+
+TOKEN_TYPES_INTO_TYPES = {
+    TokenType.INT: int,
+    TokenType.FLOAT: float,
+    TokenType.STRING: str,
+    TokenType.BOOL: bool,
+}
+POSSIBLE_TOKEN_TYPES = list(TOKEN_TYPES_INTO_TYPES.keys()) + [TokenType.CURRENCY]
 
 
 class RelationshipOperator(Enum):
@@ -45,13 +75,22 @@ TOKEN_TYPE_INTO_RELATIONSHIP_OPERAND = {
     TokenType.GREATER_THAN_OPERATOR_OR_EQUAL: RelationshipOperator.GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR
 }
 
+RELATIONSHIP_OPERAND_INTO_LAMBDA_EXPRESSION = {
+    RelationshipOperator.EQUAL_OPERATOR: lambda x, y: x == y,
+    RelationshipOperator.NOT_EQUAL_OPERATOR: lambda x, y: x != y,
+    RelationshipOperator.LESS_THAN_OPERATOR: lambda x, y: x < y,
+    RelationshipOperator.GREATER_THAN_OPERATOR: lambda x, y: x > y,
+    RelationshipOperator.LESS_THAN_OR_EQUAL_OPERATOR: lambda x, y: x <= y,
+    RelationshipOperator.GREATER_THAN_OPERATOR_OR_EQUAL_OPERATOR: lambda x, y: x >= y
+}
+
 
 class SumOperator(Enum):
     ADD = '+'
     SUB = '-'
 
 
-token_type_into_sum_operator = {
+TOKEN_TYPE_INTO_SUM_OPERATOR = {
     TokenType.ADD_OPERATOR: SumOperator.ADD,
     TokenType.SUB_OPERATOR: SumOperator.SUB
 }
@@ -67,4 +106,12 @@ token_type_into_mul_operator = {
     TokenType.MUL_OPERATOR: MulOperator.MUL,
     TokenType.DIV_OPERATOR: MulOperator.DIV,
     TokenType.MODULO_OPERATOR: MulOperator.MODULO
+}
+
+ARITHMETIC_OPERATOR_INTO_LAMBDA_EXPRESSION = {
+    SumOperator.ADD: lambda x, y: x + y,
+    SumOperator.SUB: lambda x, y: x - y,
+    MulOperator.MUL: lambda x, y: x * y,
+    MulOperator.DIV: lambda x, y: x / y,
+    MulOperator.MODULO: lambda x, y: x % y
 }

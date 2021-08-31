@@ -1,34 +1,47 @@
-from abc import ABC
 from dataclasses import dataclass
-from typing import Union, List, Optional
+from typing import List
 
-from interpreter.models.base import Param
-from interpreter.models.constants import Types
+from interpreter.models.base import Param, ParseTreeNode
+from interpreter.models.constants import CustomTypeOfTypes
 from interpreter.models.statements import Statements
-from interpreter.source.source_position import SourcePosition
 
 
 @dataclass
-class Declaration(ABC):
-    source_position: SourcePosition
+class Declaration(ParseTreeNode):
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        pass
 
 
 @dataclass
 class FunctionDeclaration(Declaration):
-    return_type: Types
+    return_type: CustomTypeOfTypes
     id: str
     params: List[Param]
-    statement: Statements
+    statements: Statements
+
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        return visitor.visit_function_declaration(self)
 
 
 @dataclass
 class VariableDeclaration(Declaration):
-    type: Types
+    type: CustomTypeOfTypes
     id: str
-    expression: Optional['Expression']
+    expression: 'Expression'
+
+    def accept(self, visitor: 'Environment', global_declaration: bool = False):
+        return visitor.visit_variable_declaration(self, global_declaration)
 
 
 @dataclass
 class CurrencyDeclaration(Declaration):
     name: str
-    value: Union[int, float]
+    value: float
+
+    def accept(self, visitor: 'Environment', global_declaration: bool):
+        return visitor.visit_currency_declaration(self)
+
+
+@dataclass
+class ParseTree:
+    declarations: List[Declaration]

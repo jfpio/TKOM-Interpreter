@@ -4,7 +4,7 @@ import pytest
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.lexer.lexer_error import LexerError
-from interpreter.models.declarations import Declaration
+from interpreter.models.declarations import Declaration, ParseTree
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
@@ -51,10 +51,18 @@ class TestParserNegative:
         with pytest.raises(ParserError):
             self.parse_program(string)
 
-    # Sprawdzać gdzie błąd wystąpił, na bazie SourcePosition
+    def test_func_with_currency_declaration(self):
+        string = 'int main(){EUR := 3;}'
+        with pytest.raises(ParserError):
+            self.parse_program(string)
+
+    def test_wrong_arguments(self):
+        string = 'int main(){a(a b);}'
+        with pytest.raises(ParserError):
+            self.parse_program(string)
 
     @staticmethod
-    def parse_program(string: str) -> List[Declaration]:
+    def parse_program(string: str) -> ParseTree:
         source = Source(io.StringIO(string))
         lexer = Lexer(source)
         parser = Parser(lexer)

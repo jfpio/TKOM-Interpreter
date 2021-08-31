@@ -4,7 +4,7 @@ import pytest
 
 from interpreter.lexer.lexer import Lexer
 from interpreter.models.base import Variable, Assignment, Constant, FunctionCall
-from interpreter.models.statements import ReturnStatement, IfStatement, Statements, WhileStatement
+from interpreter.models.statements import ReturnStatement, IfStatement, WhileStatement, Statements
 from interpreter.parser.parser import Parser
 from interpreter.parser.parser_error import ParserError
 from interpreter.source.source import Source
@@ -35,8 +35,9 @@ class TestParserConstructions:
         assert if_statement == IfStatement(
             SourcePosition(1, 13),
             simple_expression_factory(Variable(SourcePosition(1, 4), 'a')),
-            Statements([Assignment(SourcePosition(1, 11), 'a',
-                                   simple_expression_factory(Constant(SourcePosition(1, 11), 3)))])
+            Statements(
+                [Assignment(SourcePosition(1, 11), 'a',
+                            simple_expression_factory(Constant(SourcePosition(1, 11), 3)))])
         )
 
     def test_parse_if_statement_2(self):
@@ -62,8 +63,9 @@ class TestParserConstructions:
         assert while_statement == WhileStatement(
             SourcePosition(1, 16),
             simple_expression_factory(Variable(SourcePosition(1, 7), 'a')),
-            Statements([Assignment(SourcePosition(1, 14), 'a',
-                                   simple_expression_factory(Constant(SourcePosition(1, 14), 3)))])
+            Statements(
+                [Assignment(SourcePosition(1, 14), 'a',
+                            simple_expression_factory(Constant(SourcePosition(1, 14), 3)))])
         )
 
     def test_parse_while_statement_2(self):
